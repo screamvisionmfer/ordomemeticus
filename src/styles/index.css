@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { --font-cinzel:"Cinzel", serif; --font-fraktur:"UnifrakturCook", cursive; }
+.font-[Cinzel]{font-family:var(--font-cinzel)}
+.font-[UnifrakturCook]{font-family:var(--font-fraktur)}
+html,body,#root{height:100%}
+
+/* ===== ORDO: stained glass + torch flicker ===== */
+.ordo-glass {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background-image:
+    linear-gradient(125deg, rgba(255,214,120,0.035) 0 2px, transparent 2px 100%),
+    linear-gradient(55deg, rgba(255,170,90,0.03) 0 1px, transparent 1px 100%);
+  background-size: 56px 56px, 72px 72px;
+  mix-blend-mode: overlay;
+  animation: glass-pan 28s linear infinite;
+}
+@keyframes glass-pan {
+  0%   { background-position: 0%   0%,  0%  100%; }
+  100% { background-position: 100% 0%, 100% 100%; }
+}
+.ordo-torch {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background:
+    radial-gradient(380px 220px at 8% 86%,  rgba(255,180,80,0.18),  transparent 60%),
+    radial-gradient(420px 260px at 92% 86%, rgba(255,200,120,0.16), transparent 60%);
+  animation: torch-flicker 3.6s ease-in-out infinite;
+  opacity: .18;
+}
+@keyframes torch-flicker {
+  0%   { opacity: .12 }
+  25%  { opacity: .22 }
+  50%  { opacity: .17 }
+  75%  { opacity: .24 }
+  100% { opacity: .18 }
+}
+
+/* ===== ORDO: 3D tile hover ===== */
+.tile3d {
+  transform-style: preserve-3d;
+  transition: transform 280ms cubic-bezier(.22,.61,.36,1), box-shadow 280ms;
+  will-change: transform;
+}
+.tile3d[data-elev="1"] {
+  box-shadow: 0 18px 40px rgba(0,0,0,.45);
+}
+.tile3d-glint {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(240px 160px at var(--ox,50%) var(--oy,50%),
+              rgba(255,255,255,.08), transparent 60%);
+}
+
+/* cursors */
+body { cursor: url('/cursor/gauntlet.png') 16 0, auto; }
+a, button { cursor: url('/cursor/gauntlet-tap.png') 16 0, pointer; }
+.ordocursor, .ordocursor * { cursor: url('/cursor/gauntlet-tap.png') 16 0, pointer !important; }
+
+
+/* Subtle light sweep across cards every 10s */
+@keyframes sweep {
+  0%   { transform: translateX(-140%) skewX(-10deg); opacity: 0; }
+  6%   { transform: translateX(0%)    skewX(-10deg); opacity: .06; }
+  12%  { transform: translateX(140%)  skewX(-10deg); opacity: 0; }
+  100% { transform: translateX(140%)  skewX(-10deg); opacity: 0; }
+}
+.lightsweep {
+  overflow: hidden;
+}
+.lightsweep::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 35%;
+  left: -35%;
+  background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.12) 45%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.12) 55%, rgba(255,255,255,0) 100%);
+  filter: blur(1px);
+  animation: sweep 10s linear infinite;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lightsweep::before { animation: none; opacity: 0; }
+}

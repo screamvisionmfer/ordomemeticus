@@ -1,0 +1,338 @@
+import React, { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+/** ====================== Config ====================== */
+const PACK_URL = "https://vibemarket.com/pack/ordo-memeticus";
+const RARITY_ORDER = ["Mythical", "Legendary", "Epic", "Rare", "Common"] as const;
+type Rarity = typeof RARITY_ORDER[number];
+
+const rarityMeta: Record<Rarity, { hue: string; label: string; desc: string }> = {
+  Mythical:   { hue:"from-purple-900/70 via-fuchsia-900/60 to-indigo-900/70", label:"Mythical",  desc:"Relics whispered only in forbidden rites." },
+  Legendary:  { hue:"from-red-900/70 via-amber-900/60 to-orange-900/70",     label:"Legendary", desc:"Names carved into the cursed grimoire." },
+  Epic:       { hue:"from-emerald-900/70 via-teal-900/60 to-cyan-900/70",    label:"Epic",      desc:"Deeds sung beneath vaulted shadows." },
+  Rare:       { hue:"from-rose-900/70 via-pink-900/60 to-purple-900/70",     label:"Rare",      desc:"Faces seldom seen, often sworn in whispers." },
+  Common:     { hue:"from-zinc-800/70 via-zinc-900/60 to-black/70",          label:"Common",    desc:"Novices and fools, yet remembered by the chain." },
+};
+
+const CARDS = [
+  { id: "vm-madonna", name:"Mother of Memes",    role:"Matron of the Cloistered Jest",      rarity:"Mythical"  as Rarity, image:"/img/vm-madonna.jpg", blurbEN:"She cradles the joke unborn; even silence laughs in her arms." },
+  { id: "vm-roman",   name:"Vibe Imperator",     role:"Triumphant Charioteer of the Market Sun", rarity:"Legendary" as Rarity, image:"/img/vm-roman.jpg",   blurbEN:"He drove the markets by daylight and memes by moon — laurels of iron, grin of gold." },
+  { id: "vm-demon",   name:"Infernal Warden",    role:"Keeper of the Ember Chains",          rarity:"Epic"      as Rarity, image:"/img/vm-demon.jpg",   blurbEN:"A bear in mail of flame; his oath is smoke, his mercy ash." },
+  { id: "vm-bull",    name:"Knight of the Bull", role:"Guardian of the Green Banners",       rarity:"Rare"      as Rarity, image:"/img/vm-bull.jpg",    blurbEN:"Stands where forests meet the nave, blade lifted toward the next spring." },
+  { id: "vm-unicorn", name:"Stable Unicorneer",  role:"Bearer of the Rainbow Coin",          rarity:"Common"    as Rarity, image:"/img/vm-unicorn.jpg", blurbEN:"He rides the fable past the hedge, dreaming of ten to the moon." },
+];
+
+const groupByRarity = (cards: typeof CARDS) => {
+  const map: Record<Rarity, typeof CARDS> = { Mythical:[], Legendary:[], Epic:[], Rare:[], Common:[] };
+  cards.forEach(c => map[c.rarity].push(c));
+  return map;
+};
+
+const Badge: React.FC<{ rarity: Rarity }> = ({ rarity }) => (
+  <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-amber-500/30 bg-gradient-to-r ${rarityMeta[rarity].hue}`}>
+    <span className="h-1.5 w-1.5 rounded-full bg-amber-200" />
+    {rarityMeta[rarity].label}
+  </div>
+);
+
+/** ============ Backdrop: stained glass + torch flicker ============ */
+function GlazedBackdrop() {
+  return (<><div className="ordo-glass" /><div className="ordo-torch" /></>);
+}
+
+/** ============ Global BG Audio (starts on CTA) ============ */
+const BG_SRC = "/bg.mp3";
+const BgAudio: React.FC = () => {
+  const ref = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setPlaying] = useState(false);
+  useEffect(() => {
+    const a = ref.current; if (!a) return; a.volume = 0.0;
+    let started = false;
+    const handler = async () => {
+      if (started) return; started = true;
+      try {
+        a.currentTime = 0; a.load();
+        const p = a.play(); if (p && typeof (p as any).then === "function") await p;
+        setPlaying(true);
+        const target = 0.15, steps = 50, step = target/steps, interval = 10000/steps;
+        let v = 0; const id = setInterval(()=>{ v = Math.min(target, v+step); a.volume = v; if(v>=target) clearInterval(id); }, interval);
+      } catch {}
+    };
+    document.addEventListener("ordo:startAudio", handler);
+    const clickHandler = (e:any)=>{ const el = (e.target as HTMLElement); if (el?.closest?.('#ordostart')) handler(); };
+    document.addEventListener("click", clickHandler);
+    return ()=>{ document.removeEventListener("ordo:startAudio", handler); document.removeEventListener("click", clickHandler); };
+  }, []);
+  const toggle = async ()=>{
+    const a=ref.current; if(!a) return;
+    if(a.paused){ try{ await a.play(); setPlaying(true);}catch{} } else { a.pause(); setPlaying(false); }
+  };
+  return (<div className="fixed bottom-4 right-4 z-40"><audio ref={ref} src={BG_SRC} loop preload="auto" />
+    <button onClick={toggle}
+      className="rounded-full px-4 py-2 text-sm font-semibold bg-zinc-900/80 hover:bg-zinc-900/60 ring-1 ring-amber-500/30 text-amber-200 shadow-lg">
+      {isPlaying? "Pause Music":"Play Music"}
+    </button></div>);
+};
+
+/** ====================== Intro ====================== */
+const INTRO_LINES = [
+  "Hear these words, ye who stand before the glass.",
+  "For thou art not mere wanderer, but seeker of the hidden light.",
+  "",
+  "The Ordo Memeticus calleth thee.",
+  "Within these windows lie not the faces of kings, but of brethren — saints and jesters, prophets and heretics, martyrs and villains.",
+  "Each is truth, each is folly, each is bound eternal in glass and chain.",
+];
+
+const IntroScreen: React.FC<{ onEnter: () => void }>=({ onEnter })=>{
+  const voiceRef = useRef<HTMLAudioElement|null>(null);
+  const [started, setStarted] = useState(false);
+  const [logoDock, setLogoDock] = useState(false);
+  const begin = () => {
+    setStarted(true);
+    setTimeout(()=> setLogoDock(true), 150);
+    const v = voiceRef.current; if (v){ v.volume = 0.25; v.currentTime = 0; v.play().catch(()=>{}); }
+    document.dispatchEvent(new Event("ordo:startAudio"));
+  };
+  return (
+    <div className="min-h-screen bg-black text-amber-200 flex items-center justify-center relative overflow-hidden">
+      <audio ref={voiceRef} src="/Intro.mp3" preload="auto"/>
+      <div className="relative w-full max-w-4xl mx-auto px-6 text-center">
+        <motion.h1
+          initial={{ opacity: 0, top: "28%" }}
+          animate={{ opacity: 1, top: started ? (logoDock ? "8%" : "28%") : "28%" }}
+          transition={{ duration: 0.9, ease: "easeOut" }}
+          className="absolute left-1/2 -translate-x-1/2 font-[UnifrakturCook] text-5xl md:text-6xl tracking-wide"
+        >ORDO MEMETICUS</motion.h1>
+
+        {!started && (
+          <div className="pt-80 flex flex-col items-center gap-6">
+            <button id="ordostart" onClick={begin}
+              className="px-6 py-3 bg-gradient-to-r from-purple-900 to-red-900 hover:from-purple-700 hover:to-red-700 ring-1 ring-amber-500/30 rounded-xl font-semibold">
+              Hear the Great Ones
+            </button>
+          </div>
+        )}
+
+        {started && (
+          <motion.div className="pt-44 flex flex-col items-center text-center"
+            initial={{ opacity: 0 }} animate={{ opacity: logoDock ? 1 : 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}>
+            <motion.div className="mt-8 md:mt-10 max-w-3xl text-lg md:text-xl italic leading-relaxed text-amber-100/90 space-y-3"
+              initial="hidden" animate={logoDock ? "show" : "hidden"}
+              variants={{ hidden:{}, show:{ transition:{ staggerChildren:0.25, delayChildren:0.1 } } }}>
+              {INTRO_LINES.map((line,i)=> line==="" ? <div key={i} className="h-3"/> : (
+                <motion.p key={i} variants={{hidden:{opacity:0,y:-10},show:{opacity:1,y:0}}} transition={{duration:0.55,ease:"easeOut"}}>{line}</motion.p>
+              ))}
+            </motion.div>
+            <motion.button onClick={onEnter} initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: logoDock ? 1 : 0, y: logoDock ? 0 : 16 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.8 }}
+              className="mt-10 px-6 py-3 bg-gradient-to-r from-purple-900 to-red-900 hover:from-purple-700 hover:to-red-700 ring-1 ring-amber-500/30 rounded-xl font-semibold">
+              Enter the Cloister
+            </motion.button>
+          </motion.div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/** ============ Tile3D (suspended plate) ============ */
+type Tile3DProps = { className?: string; children: React.ReactNode; onClick?: () => void; style?: React.CSSProperties; };
+function Tile3D({ className = "", children, onClick, style }: Tile3DProps) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [s, setS] = useState({ rx:0, ry:0, tz:0, ox:50, oy:50, elev:0 });
+  const onMove = (e: React.MouseEvent) => {
+    const el = ref.current; if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    const px = (x / r.width) * 100, py = (y / r.height) * 100;
+    const ry = ((x - r.width/2) / r.width) * 10;
+    const rx = -((y - r.height/2) / r.height) * 10;
+    const dist = Math.hypot(px-50, py-50);
+    const tz = -Math.min(10, dist/1.8);
+    setS({ rx, ry, tz, ox:px, oy:py, elev:1 });
+  };
+  const onLeave = () => setS({ rx:0, ry:0, tz:0, ox:50, oy:50, elev:0 });
+  return (
+    <div ref={ref} onMouseMove={onMove} onMouseLeave={onLeave} onClick={onClick}
+      data-elev={s.elev}
+      className={`tile3d ordocursor ${className}`}
+      style={{ ...style, transform: `perspective(1200px) rotateX(${s.rx}deg) rotateY(${s.ry}deg) translateZ(${s.tz}px)`, ["--ox" as any]: `${s.ox}%`, ["--oy" as any]: `${s.oy}%` }}>
+      <div className="tile3d-glint" />
+      {children}
+    </div>
+  );
+}
+
+/** ====================== Card ====================== */
+function GlassCard({ card, onOpen }: { card:any; onOpen:(c:any)=>void }){
+  return (
+    <Tile3D onClick={()=> onOpen(card)}
+      className="relative overflow-visible rounded-2xl bg-black/60 ring-1 ring-amber-500/20 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,200,0,0.08)]">
+      <div className={`pointer-events-none absolute -inset-1 opacity-25 blur-2xl bg-gradient-to-br ${rarityMeta[card.rarity].hue}`} />
+      <div className="relative grid grid-cols-1 md:grid-cols-5">
+        <div className="md:col-span-2">
+          <div className="overflow-hidden rounded-l-2xl md:rounded-l-2xl md:rounded-r-none">
+            <img src={card.image} alt={card.name} className="h-full w-full object-cover object-center"/>
+          </div>
+        </div>
+        <div className="md:col-span-3 p-5 md:p-7 flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-xl md:text-2xl font-semibold tracking-tight text-amber-100/90">{card.name}</h3>
+            <Badge rarity={card.rarity} />
+          </div>
+          <p className="text-amber-200/60 text-sm md:text-base italic">{card.role}</p>
+          <p className="text-amber-100/90 text-sm md:text-base">{card.blurbEN}</p>
+        </div>
+      </div>
+    </Tile3D>
+  );
+}
+
+/** ====================== Lightbox ====================== */
+function Lightbox({ card, onClose, onPrev, onNext }:{ card:any, onClose:()=>void, onPrev:()=>void, onNext:()=>void }){
+  useEffect(()=>{
+    const onKey=(e:KeyboardEvent)=>{ if(e.key==='Escape') onClose(); if(e.key==='ArrowLeft') onPrev(); if(e.key==='ArrowRight') onNext(); };
+    document.addEventListener('keydown', onKey); return ()=> document.removeEventListener('keydown', onKey);
+  },[onClose,onPrev,onNext]);
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose}/>
+      <button onClick={onPrev} className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 rounded-full ring-1 ring-amber-500/30 bg-zinc-900/70 hover:bg-zinc-900/60 text-amber-200">‹</button>
+      <button onClick={onNext} className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 rounded-full ring-1 ring-amber-500/30 bg-zinc-900/70 hover:bg-zinc-900/60 text-amber-200">›</button>
+      <button onClick={onClose} className="absolute top-6 right-6 z-50 rounded-full w-10 h-10 flex items-center justify-center ring-1 ring-amber-500/30 bg-zinc-900/80 hover:bg-zinc-900/60 text-amber-200 font-bold">×</button>
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <AnimatePresence mode="popLayout">
+          <motion.div key={card.id}
+            initial={{ opacity: 0, x: 40, scale: .98 }}
+            animate={{ opacity: 1, x: 0,  scale: 1 }}
+            exit={{    opacity: 0, x:-40, scale: .98 }}
+            transition={{ duration: .35, ease: "easeOut" }}>
+            <Tile3D className="relative w-full max-w-6xl rounded-2xl bg-black/70 ring-1 ring-amber-500/30 backdrop-blur-xl">
+              <div className={`pointer-events-none absolute -inset-1 opacity-25 blur-2xl bg-gradient-to-br ${rarityMeta[card.rarity].hue}`} />
+              <div className="relative grid grid-cols-1 md:grid-cols-5">
+                <div className="md:col-span-2">
+                  <div className="overflow-hidden rounded-l-2xl md:rounded-l-2xl md:rounded-r-none">
+                    <img src={card.image} alt={card.name} className="w-full h-full object-cover"/>
+                  </div>
+                </div>
+                <div className="md:col-span-3 p-6 md:p-8 flex flex-col gap-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-2xl md:text-3xl font-semibold tracking-tight text-amber-100/90">{card.name}</h3>
+                    <Badge rarity={card.rarity} />
+                  </div>
+                  <p className="text-amber-200/60 text-base md:text-lg italic">{card.role}</p>
+                  <p className="text-amber-100/90 text-base md:text-lg">{card.blurbEN}</p>
+                  <div className="mt-2">
+                    <a href={PACK_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded px-4 py-2 text-sm font-semibold ring-1 ring-amber-500/30 bg-zinc-900/80 hover:bg-zinc-900/60 text-amber-200">Collect this Relic</a>
+                  </div>
+                </div>
+              </div>
+            </Tile3D>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+/** ====================== Page ====================== */
+export default function App(){
+  const [showIntro, setShowIntro] = useState(true);
+  const [filter, setFilter] = useState<Rarity | "All">("All");
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const list = filter==="All" ? CARDS : CARDS.filter(c=>c.rarity===filter);
+  const grouped = groupByRarity(list);
+
+  return (
+    <div className="min-h-screen bg-[#060608] text-amber-100 font-serif">
+      <GlazedBackdrop />
+      <BgAudio />
+      <AnimatePresence initial={false}>
+        {showIntro ? (
+          <IntroScreen key="intro" onEnter={()=> setShowIntro(false)} />
+        ) : (
+          <motion.main key="main" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+            <header className="sticky top-0 z-30 backdrop-blur-xl bg-black/70 ring-1 ring-amber-500/20 border-b border-amber-500/20">
+              <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+                <div className="font-black text-xl tracking-[0.3em] text-amber-200 font-[UnifrakturCook]">ORDO MEMETICUS</div>
+                <a href={PACK_URL} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-2 rounded px-4 py-2 text-sm font-semibold ring-1 ring-amber-500/30 bg-zinc-900/80 hover:bg-zinc-900/60 text-amber-200">Enter the Cloister</a>
+              </div>
+            </header>
+
+            <section className="relative mx-auto max-w-4xl px-4 py-16 text-center">
+              <h1 className="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight text-amber-200 drop-shadow-[0_2px_8px_rgba(255,200,0,0.15)] font-[UnifrakturCook]">The Ordo Memeticus</h1>
+              <p className="mt-6 text-lg md:text-xl text-amber-100/90 italic max-w-3xl mx-auto">"In glass and chain our brethren endure — saints and sinners, martyrs and jesters, villains crowned in shame. Take a relic, and be bound to the brotherhood eternal."</p>
+              <div className="mt-10 flex justify-center gap-4">
+                <a href={PACK_URL} target="_blank" rel="noreferrer" className="rounded-xl px-6 py-3 font-semibold bg-gradient-to-r from-purple-900 to-red-900 hover:from-purple-700 hover:to-red-700 ring-1 ring-amber-500/30">Enter the Pack</a>
+                <a href="#relics" className="rounded-xl px-6 py-3 font-semibold bg-zinc-900/70 ring-1 ring-amber-500/30 hover:bg-zinc-900/90 text-amber-200">View Relics</a>
+              </div>
+            </section>
+
+            <section id="relics" className="relative mx-auto max-w-6xl px-4 pb-24">
+              <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <h2 className="text-2xl md:text-3xl font-bold text-amber-100 font-[UnifrakturCook]">Relics of the Dark Brotherhood</h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  {(["All", ...RARITY_ORDER] as Array<"All" | Rarity>).map((r) => (
+                    <button key={r} onClick={()=> setFilter(r)}
+                      className={`px-3 py-1.5 rounded-full text-sm ring-1 ring-amber-500/30 transition ${filter===r? "bg-amber-600/30 text-amber-100":"bg-zinc-900/60 text-amber-200/70 hover:bg-zinc-900/80"}`}>
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {RARITY_ORDER.filter(r => filter === "All" || r === filter).map((rarity) => (
+                <div key={rarity} className="space-y-6 mb-12">
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <h3 className="text-xl md:text-2xl font-semibold text-amber-100/90">{rarityMeta[rarity].label}</h3>
+                      <p className="text-sm text-amber-200/60">{rarityMeta[rarity].desc}</p>
+                    </div>
+                    <div className={`hidden md:block h-px w-1/2 bg-gradient-to-r ${rarityMeta[rarity].hue}`} />
+                  </div>
+                  <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
+                    variants={{ hidden:{}, show:{ transition:{ staggerChildren:0.12, delayChildren:0.05 } } }}
+                    initial="hidden" whileInView="show" viewport={{ once:true, amount:0.2 }}>
+                    {grouped[rarity].map((card) => (
+                      <motion.div key={card.id} variants={{ hidden:{opacity:0,y:12,scale:0.98}, show:{opacity:1,y:0,scale:1, transition:{duration:0.45,ease:"easeOut"}} }}>
+                        <GlassCard card={card} onOpen={(c)=> setLightboxIndex(list.findIndex(x=>x.id===c.id))} />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </div>
+              ))}
+            </section>
+
+            {lightboxIndex !== null && (
+              <Lightbox
+                card={list[lightboxIndex]}
+                onClose={()=> setLightboxIndex(null)}
+                onPrev={()=> setLightboxIndex((i)=>{
+                  const L = list.length; if (i == null) return 0; return (i - 1 + L) % L;
+                })}
+                onNext={()=> setLightboxIndex((i)=>{
+                  const L = list.length; if (i == null) return 0; return (i + 1) % L;
+                })}
+              />
+            )}
+
+            <footer className="relative border-t border-amber-500/20 bg-black/80">
+              <div className="mx-auto max-w-6xl px-4 py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="space-y-2">
+                  <div className="text-amber-200 font-semibold tracking-wide font-[UnifrakturCook]">ORDO MEMETICUS</div>
+                  <p className="text-amber-200/60 text-sm max-w-xl">
+                    All faces are remembered — heroes, fools, martyrs, and villains. Raise not stone nor parchment, but glass and chain. <em>In tenebris, lumen.</em>
+                  </p>
+                </div>
+                <a href={PACK_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold bg-gradient-to-r from-purple-900 to-red-900 hover:from-purple-700 hover:to-red-700 ring-1 ring-amber-500/30">Enter the Cloister</a>
+              </div>
+            </footer>
+          </motion.main>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
