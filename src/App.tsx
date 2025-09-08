@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import OrderStory from "./components/OrderStory";
 import { motion, AnimatePresence } from "framer-motion";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 /** ====================== Config ====================== */
 const PACK_URL = "https://vibemarket.com/pack/ordo-memeticus";
