@@ -1,6 +1,0 @@
-/* Force-remove any injected icon pseudo-elements in header links */
-.no-icon::before,
-.no-icon::after {
-  content: none !important;
-  display: none !important;
-}

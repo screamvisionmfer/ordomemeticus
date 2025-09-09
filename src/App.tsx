@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import OrderStory from "./components/OrderStory";
 import { motion, AnimatePresence } from "framer-motion";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
+import OMHeaderPillIntegrated from "./components/OMHeaderPillIntegrated";
 /** ====================== Config ====================== */
 const PACK_URL = "https://vibemarket.com/pack/ordo-memeticus";
 const RARITY_ORDER = ["Mythical", "Legendary", "Epic", "Rare", "Common"] as const;
@@ -206,40 +206,94 @@ function GlazedBackdrop() {
   return (<><div className="ordo-glass" /><div className="ordo-torch" /></>);
 }
 
+
 /** ============ Global BG Audio (starts on CTA) ============ */
 const BG_SRC = "/bg.mp3";
+const TAVERN_SRC = "/tavern.mp3"; // from public/tavern.mp3 (root path)
+
 const BgAudio: React.FC = () => {
-  const ref = useRef<HTMLAudioElement | null>(null);
+  const musicRef = useRef<HTMLAudioElement | null>(null);
+  const tavernRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setPlaying] = useState(false);
+
   useEffect(() => {
-    const a = ref.current; if (!a) return; a.volume = 0.0;
+    const music = musicRef.current;
+    const tavern = tavernRef.current;
+    if (!music || !tavern) return;
+
+    // start volumes
+    music.volume = 0.0;   // will fade-in to ~0.15
+    tavern.volume = 0.1;  // ~10% as requested (no fade necessary)
+    tavern.loop = true;
+    music.loop = true;
+
     let started = false;
     const handler = async () => {
-      if (started) return; started = true;
+      if (started) return; 
+      started = true;
       try {
-        a.currentTime = 0; a.load();
-        const p = a.play(); if (p && typeof (p as any).then === "function") await p;
+        // (re)load and play both tracks
+        tavern.currentTime = 0;
+        music.currentTime = 0;
+        tavern.load();
+        music.load();
+        await tavern.play().catch(() => {});
+        const p = music.play(); if (p && typeof (p as any).then === "function") await p;
         setPlaying(true);
-        const target = 0.15, steps = 50, step = target/steps, interval = 10000/steps;
-        let v = 0; const id = setInterval(()=>{ v = Math.min(target, v+step); a.volume = v; if(v>=target) clearInterval(id); }, interval);
+
+        // fade-in for main music only
+        const target = 0.15, steps = 50, step = target / steps, interval = 10000 / steps;
+        let v = 0; 
+        const id = setInterval(() => { 
+          v = Math.min(target, v + step); 
+          music.volume = v; 
+          if (v >= target) clearInterval(id); 
+        }, interval);
       } catch {}
     };
-    document.addEventListener("ordo:startAudio", handler);
-    const clickHandler = (e:any)=>{ const el = (e.target as HTMLElement); if (el?.closest?.('#ordostart')) handler(); };
-    document.addEventListener("click", clickHandler);
-    return ()=>{ document.removeEventListener("ordo:startAudio", handler); document.removeEventListener("click", clickHandler); };
-  }, []);
-  const toggle = async ()=>{
-    const a=ref.current; if(!a) return;
-    if(a.paused){ try{ await a.play(); setPlaying(true);}catch{} } else { a.pause(); setPlaying(false); }
-  };
-  return (<div className="fixed bottom-4 right-4 z-40"><audio ref={ref} src={BG_SRC} loop preload="auto" />
-    <button onClick={toggle}
-      className="rounded-full px-4 py-2 text-sm font-semibold bg-zinc-900/80 hover:bg-zinc-900/60 ring-1 ring-amber-500/30 text-amber-200 shadow-lg">
-      {isPlaying? "Pause Music":"Play Music"}
-    </button></div>);
-};
 
+    // same triggers as before
+    document.addEventListener("ordo:startAudio", handler);
+    const clickHandler = (e: any) => { 
+      const el = (e.target as HTMLElement); 
+      if (el?.closest?.('#ordostart')) handler(); 
+    };
+    document.addEventListener("click", clickHandler);
+
+    return () => { 
+      document.removeEventListener("ordo:startAudio", handler); 
+      document.removeEventListener("click", clickHandler); 
+    };
+  }, []);
+
+  const toggle = async () => {
+    const music = musicRef.current;
+    const tavern = tavernRef.current;
+    if (!music || !tavern) return;
+    if (music.paused) { 
+      try { 
+        await tavern.play(); 
+        await music.play(); 
+        setPlaying(true); 
+      } catch {} 
+    } else { 
+      music.pause(); 
+      tavern.pause(); 
+      setPlaying(false); 
+    }
+  };
+
+  return (
+    <div className="fixed bottom-4 right-4 z-40">
+      <audio ref={musicRef} src={BG_SRC} loop preload="auto" />
+      <audio ref={tavernRef} src={TAVERN_SRC} loop preload="auto" />
+      <button onClick={toggle}
+        className="rounded-full px-4 py-2 text-sm font-semibold bg-zinc-900/80 hover:bg-zinc-900/60 ring-1 ring-amber-500/30 text-amber-200 shadow-lg">
+        {isPlaying ? "Pause Music" : "Play Music"}
+      </button>
+    </div>
+  );
+};
 /** ====================== Intro ====================== */
 const INTRO_LINES = [
   "Hear these words, ye who stand before the glass.",
@@ -388,6 +442,9 @@ function Lightbox({ card, onClose, onPrev, onNext, autoplayToken }:{ card:any, o
   const [dur, setDur] = useState(0);
   const [playToken, setPlayToken] = useState(0); // trigger replays on card change
 
+  // lock page scroll while lightbox open
+  useEffect(() => { const el = document.documentElement; const prev = el.style.overflow; el.style.overflow = 'hidden'; return () => { el.style.overflow = prev || ''; }; }, []);
+
   // Build audio src by matching number from card.image or id
   const numFromImage = (()=>{
     const m = (card?.image||'').match(/\/([0-9]+)\./);
@@ -437,9 +494,9 @@ const audioSrc = numFromImage ? `/chars/${numFromImage}.mp3` : undefined;
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose}/>
-      <button onClick={onPrev} className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 rounded-full ring-1 ring-amber-500/30 bg-zinc-900/70 hover:bg-zinc-900/60 text-amber-200 transition transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 hover:ring-2 hover:ring-amber-300/40">‹</button>
-      <button onClick={onNext} className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 rounded-full ring-1 ring-amber-500/30 bg-zinc-900/70 hover:bg-zinc-900/60 text-amber-200 transition transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 hover:ring-2 hover:ring-amber-300/40">›</button>
-      <button onClick={onClose} className="absolute top-6 right-6 z-50 rounded-full w-10 h-10 flex items-center justify-center ring-1 ring-amber-500/30 bg-zinc-900/80 hover:bg-zinc-900/60 text-amber-200 font-bold transition transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 hover:ring-2 hover:ring-amber-300/40">×</button>
+      <button onClick={onPrev} className="w-12 h-12 md:w-10 md:h-10 absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 rounded-full ring-1 ring-amber-500/30 bg-zinc-900/70 hover:bg-zinc-900/60 text-amber-200 transition transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 hover:ring-2 hover:ring-amber-300/40">‹</button>
+      <button onClick={onNext} className="w-12 h-12 md:w-10 md:h-10 absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 rounded-full ring-1 ring-amber-500/30 bg-zinc-900/70 hover:bg-zinc-900/60 text-amber-200 transition transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 hover:ring-2 hover:ring-amber-300/40">›</button>
+      <button onClick={onClose} className="w-12 h-12 md:w-10 md:h-10 absolute top-6 right-6 z-50 rounded-full w-10 h-10 flex items-center justify-center ring-1 ring-amber-500/30 bg-zinc-900/80 hover:bg-zinc-900/60 text-amber-200 font-bold transition transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 hover:ring-2 hover:ring-amber-300/40">×</button>
       {/* narration audio element */}
       <audio ref={audioRef} preload="auto" src={audioSrc} key={audioSrc}
         onTimeUpdate={()=>{ const el=audioRef.current; if(!el) return; setCur(el.currentTime); setDur(el.duration||0); if(el.duration>0) setProgress(el.currentTime/el.duration); }}
@@ -452,12 +509,12 @@ const audioSrc = numFromImage ? `/chars/${numFromImage}.mp3` : undefined;
             animate={{ opacity: 1, x: 0,  scale: 1 }}
             exit={{    opacity: 0, x:-40, scale: .98 }}
             transition={{ duration: .35, ease: "easeOut" }}>
-            <Tile3D className="group relative w-full max-w-6xl rounded-2xl bg-black/70 ring-1 ring-amber-500/30 backdrop-blur-xl">
+            <Tile3D className="group relative w-full max-w-6xl max-h-[100dvh] md:max-h-[90vh] overflow-hidden rounded-2xl bg-black/70 ring-1 ring-amber-500/30 backdrop-blur-xl">
               <div className={`pointer-events-none absolute -inset-1 opacity-25 blur-2xl bg-gradient-to-br ${rarityMeta[card.rarity].hue}`} />
               <div className="relative grid grid-cols-1 md:grid-cols-5">
                 <div className="md:col-span-2">
                   <div className="relative overflow-hidden rounded-l-2xl md:rounded-l-2xl md:rounded-r-none">
-                    <img src={card.image} alt={card.name} className="w-full h-full object-cover"/>
+                    <img src={card.image} alt={card.name} className="w-full h-auto object-contain max-h-[42vh] md:max-h-[70vh]"/>
                     <div className="pointer-events-none absolute inset-0 lightsweep"></div>
                   </div>
                 </div>
@@ -542,44 +599,33 @@ export default function App(){
   return (
     <div className="min-h-screen bg-[#060608] text-amber-100 font-serif">
       <GlazedBackdrop />
-      <BgAudio />
+      <> </>
+      <AnimatePresence initial={false}>
+        {!showIntro && (
+          <motion.div
+            key="header"
+            initial={{ y: -80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -80, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 240, damping: 24 }}
+          >
+            <OMHeaderPillIntegrated />
+          </motion.div>
+        )}
+      </AnimatePresence>
       <AnimatePresence initial={false}>
         {showIntro ? (
           <IntroScreen key="intro" onEnter={()=> setShowIntro(false)} />
         ) : (
           <motion.main key="main" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-            <header className="sticky top-0 z-30 backdrop-blur-xl bg-black/70 ring-1 ring-amber-500/20 border-b border-amber-500/20">
-              <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-                <div className="font-black text-xl tracking-[0.3em] text-amber-200 font-[UnifrakturCook]">ORDO MEMETICUS</div>
-                
-                <nav className="hidden md:flex items-center gap-3 md:gap-4 text-amber-200/80">
-                  <a href="https://x.com/scream_vision" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm text-amber-200/90 ring-1 ring-amber-500/30 bg-black/20 transition hover:bg-black/35 hover:ring-amber-400/50 hover:translate-y-0.5">Twitter</a>
-                  <a href="https://farcaster.xyz/screamvision" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm text-amber-200/90 ring-1 ring-amber-500/30 bg-black/20 transition hover:bg-black/35 hover:ring-amber-400/50 hover:translate-y-0.5">Farcaster</a>
-                </nav>
-                <button className="md:hidden inline-flex items-center justify-center rounded-xl px-3 py-2 ring-1 ring-amber-500/30 bg-black/20 text-amber-200/90" onClick={()=> setIsMenuOpen(v=>!v)} aria-label="Open menu">MENU</button>
-                <a href={PACK_URL} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-2 rounded px-4 py-2 text-sm font-semibold ring-1 ring-amber-500/30 bg-zinc-900/80 hover:bg-zinc-900/60 text-amber-200">Enter the Cloister</a>
-              </div>
-            
-            {/* mobile fullscreen menu */}
-            {isMenuOpen && (
-              <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-sm flex items-center justify-center p-6">
-                <div className="w-full max-w-sm space-y-4">
-                  <a href={PACK_URL} target="_blank" rel="noreferrer"
-                     className="w-full inline-flex items-center justify-center rounded-xl px-5 py-3 text-base font-semibold bg-gradient-to-b from-amber-400/90 to-amber-600/90 text-black ring-1 ring-amber-700/40 shadow-[inset_0_1px_0_rgba(255,255,255,.25),0_6px_20px_rgba(0,0,0,.25)]">Enter the Cloister</a>
-                  <a href="https://x.com/scream_vision" target="_blank" rel="noreferrer" className="block w-full rounded-xl px-5 py-3 text-base ring-1 ring-amber-500/30 bg-black/30 text-amber-200/90 text-center">Twitter</a>
-                  <a href="https://farcaster.xyz/screamvision" target="_blank" rel="noreferrer" className="block w-full rounded-xl px-5 py-3 text-base ring-1 ring-amber-500/30 bg-black/30 text-amber-200/90 text-center">Farcaster</a>
-                  <button onClick={()=> setIsMenuOpen(false)} className="block w-full rounded-xl px-5 py-3 text-base ring-1 ring-amber-500/30 bg-black/20 text-amber-200/80">Close</button>
-                </div>
-              </div>
-            )}
-</header>
+           
 
             <section className="relative mx-auto max-w-4xl px-4 py-16 text-center">
               <h1 className="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight text-amber-200 drop-shadow-[0_2px_8px_rgba(255,200,0,0.15)] font-[UnifrakturCook]">The Ordo Memeticus</h1>
               <p className="mt-6 text-lg md:text-xl text-amber-100/90 italic max-w-3xl mx-auto">"In glass and chain our brethren endure — saints and sinners, martyrs and jesters, villains crowned in shame. Take a relic, and be bound to the brotherhood eternal."</p>
               <div className="mt-10 flex justify-center gap-4">
                 <a href={PACK_URL} target="_blank" rel="noreferrer" className="rounded-xl px-6 py-3 font-semibold bg-gradient-to-r from-purple-900 to-red-900 hover:from-purple-700 hover:to-red-700 ring-1 ring-amber-500/30">Enter the Pack</a>
-                <a href="#relics" className="rounded-xl px-6 py-3 font-semibold bg-zinc-900/70 ring-1 ring-amber-500/30 hover:bg-zinc-900/90 text-amber-200">View Relics</a>
+                <button className="rounded-xl px-6 py-3 font-semibold bg-zinc-900/70 ring-1 ring-amber-500/30 hover:bg-zinc-900/90 text-amber-200" onClick={() => document.getElementById('relics')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>View Relics</button>
               </div>
             </section>
 
