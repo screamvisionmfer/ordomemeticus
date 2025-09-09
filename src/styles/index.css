@@ -90,3 +90,99 @@ a, button { cursor: url('/cursor/gauntlet-tap.png') 16 0, pointer; }
 @media (prefers-reduced-motion: reduce) {
   .lightsweep::before { animation: none; opacity: 0; }
 }
+/* ===== Mobile landscape fixes ===== */
+@media (orientation: landscape) and (max-height: 520px) {
+  /* Карточки: не прыгают по размеру, медиа и текст ужимаются предсказуемо */
+  .card-root {
+    height: 86vh;          /* одна «страница» */
+    max-height: 86vh;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr; /* слева картинка, справа текст */
+    gap: 16px;
+    align-items: center;
+  }
+  .card-media {
+    max-height: 80vh;
+    height: 80vh;
+    object-fit: contain;
+  }
+  .card-body {
+    min-height: 0;
+    overflow: auto;         /* если текст длинный — скролл внутри, а не по странице */
+  }
+
+  /* Лайтбокс компактнее в горизонтали на мобилке */
+  .lightbox-size {
+    width: 92vw !important;
+    height: 86vh !important;
+    max-height: 86vh !important;
+  }
+
+  /* Прячем лор на мобилке-горизонтали */
+  .hide-on-mobile-landscape {
+    display: none !important;
+  }
+}
+
+/* На маленьких экранах по высоте — держим всё в одном экране */
+@media (max-height: 700px) and (max-width: 1024px) {
+  .lightbox-size {
+    width: 92vw;
+    height: 86vh;
+    max-height: 86vh;
+  }
+}
+
+/* Чуть мягче переполнение по редким кейсам */
+html, body, #root {
+  height: 100%;
+  overscroll-behavior-y: contain;
+}
+
+
+/* helper: hidden by default */
+.show-on-mobile-landscape{ display:none; }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .show-on-mobile-landscape{ display:block; }
+}
+
+
+/* Equalize card dimensions on mobile landscape */
+@media (orientation: landscape) and (max-height: 520px) {
+  .card-equal {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 86vh;
+    width: 44vw;
+  }
+}
+
+
+/* Force one-column grid in mobile landscape to avoid squeeze/overflow */
+@media (orientation: landscape) and (max-height: 520px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    column-gap: 16px;
+    row-gap: 16px;
+  }
+  /* ensure inner text doesn't push layout */
+  .card-root { align-items: center; }
+  .card-body { overflow: auto; }
+}
+
+
+/* Scale gallery cards down by 10% in mobile landscape */
+@media (orientation: landscape) and (max-height: 520px) {
+  .card-scale-90 { 
+    transform: scale(0.9);
+    transform-origin: center;
+  }
+}
+
+
+/* Make lightbox image fill almost entire card height on mobile */
+@media (max-width: 639px) {
+  .img-fullcard { max-height: calc(100dvh - 240px); }
+}

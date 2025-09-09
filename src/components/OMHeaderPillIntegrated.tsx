@@ -8,10 +8,10 @@ import React, { useEffect, useState } from "react";
 
 /** Replace with your real links */
 export const LINKS = {
-  twitter: "https://twitter.com/your_handle",
-  farcaster: "https://warpcast.com/your_handle",
-  linktree: "https://linktr.ee/your_handle",
-  join: "#join", // or route/modals anchor
+  twitter: "https://x.com/scream_vision",
+  farcaster: "https://farcaster.xyz/screamvision",
+  linktree: "https://linktr.ee/screamvision",
+  join: "https://vibemarket.com/market/ordo-memeticus?ref=B3FLA1AGGOH2", // or route/modals anchor
 };
 
 const IconBurger = ({ className }: { className?: string }) => (

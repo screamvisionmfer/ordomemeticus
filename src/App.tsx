@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import OMHeaderPillIntegrated from "./components/OMHeaderPillIntegrated";
 /** ====================== Config ====================== */
-const PACK_URL = "https://vibemarket.com/pack/ordo-memeticus";
+const PACK_URL = "https://vibemarket.com/market/ordo-memeticus?ref=B3FLA1AGGOH2";
 const RARITY_ORDER = ["Mythical", "Legendary", "Epic", "Rare", "Common"] as const;
 type Rarity = typeof RARITY_ORDER[number];
 
@@ -345,7 +345,7 @@ const IntroScreen: React.FC<{ onEnter: () => void }>=({ onEnter })=>{
                 <motion.p key={i} variants={{hidden:{opacity:0,y:-10},show:{opacity:1,y:0}}} transition={{duration:0.55,ease:"easeOut"}}>{line}</motion.p>
               ))}
               </motion.div>
-            <motion.button onClick={onEnter} initial={{ opacity: 0, y: 16 }}
+            <motion.button onClick={()=>{ begin(); onEnter(); }} initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: logoDock ? 1 : 0, y: logoDock ? 0 : 16 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.8 }}
               className="mt-10 px-6 py-3 bg-gradient-to-r from-purple-900 to-red-900 hover:from-purple-700 hover:to-red-700 ring-1 ring-amber-500/30 rounded-xl font-semibold">
@@ -391,30 +391,31 @@ function GlassCard({ card, onOpen }: { card: any; onOpen: (c: any) => void }) {
   return (
     <Tile3D
       onClick={() => onOpen(card)}
-      className="group relative overflow-visible rounded-2xl bg-black/60 ring-1 ring-amber-500/20 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,200,0,0.08)]"
+      className="card-equal card-scale-90 group relative overflow-visible rounded-2xl bg-black/60 ring-1 ring-amber-500/20 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,200,0,0.08)]"
     >
 
       {/* Контент карточки */}
-      <div className="relative grid grid-cols-1 md:grid-cols-5">
+      <div className="relative grid grid-cols-1 md:grid-cols-5 card-root">
         <div className="md:col-span-2">
           <div className="relative overflow-hidden rounded-l-2xl md:rounded-l-2xl md:rounded-r-none">
             <div className="relative">
 <img
               src={card.image}
               alt={card.name}
-              className="h-full w-full object-cover object-center"
+              className="card-media h-full w-full object-cover object-center"
             />
 <div className="pointer-events-none absolute inset-0 lightsweep opacity-0 md:opacity-100"></div>
 </div>
           </div>
         </div>
 
-        <div className="md:col-span-3 p-5 md:p-7 flex flex-col gap-4">
+        <div className="md:col-span-3 p-5 md:p-7 flex flex-col gap-4 card-body">
+          <div className="show-on-mobile-landscape mb-1"><Badge rarity={card.rarity} /></div>
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-xl md:text-2xl font-semibold tracking-tight text-amber-100/90">
               {card.name}
             </h3>
-            <Badge rarity={card.rarity} />
+            <div className="hide-on-mobile-landscape"><Badge rarity={card.rarity} /></div>
           </div>
 
           <p className="text-amber-200/60 text-sm md:text-base italic">
@@ -511,14 +512,15 @@ const audioSrc = numFromImage ? `/chars/${numFromImage}.mp3` : undefined;
             transition={{ duration: .35, ease: "easeOut" }}>
             <Tile3D className="group relative w-full max-w-6xl max-h-[100dvh] md:max-h-[90vh] overflow-hidden rounded-2xl bg-black/70 ring-1 ring-amber-500/30 backdrop-blur-xl">
               <div className={`pointer-events-none absolute -inset-1 opacity-25 blur-2xl bg-gradient-to-br ${rarityMeta[card.rarity].hue}`} />
-              <div className="relative grid grid-cols-1 md:grid-cols-5">
+              <div className="relative grid grid-cols-1 md:grid-cols-5 card-root">
                 <div className="md:col-span-2">
                   <div className="relative overflow-hidden rounded-l-2xl md:rounded-l-2xl md:rounded-r-none">
-                    <img src={card.image} alt={card.name} className="w-full h-auto object-contain max-h-[42vh] md:max-h-[70vh]"/>
+                    <img src={card.image} alt={card.name} className="w-full h-auto object-contain max-h-[calc(100dvh-240px)] md:max-h-[70vh]"/>
                     <div className="pointer-events-none absolute inset-0 lightsweep"></div>
                   </div>
                 </div>
                 <div className="md:col-span-3 p-6 md:p-8 flex flex-col gap-4">
+                  <div className="show-on-mobile-landscape mb-1"><Badge rarity={card.rarity} /></div>
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
   <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight text-amber-100 font-[UnifrakturCook]">{card.name}</h3>
@@ -534,12 +536,12 @@ const audioSrc = numFromImage ? `/chars/${numFromImage}.mp3` : undefined;
     </svg>
   </button>
 </div>
-<Badge rarity={card.rarity} />
+<div className="hide-on-mobile-landscape"><Badge rarity={card.rarity} /></div>
                   </div>
                   <p className="text-amber-200/60 text-base md:text-lg italic">{card.role}</p>
-                  <p className="text-amber-100/90 text-base md:text-lg">{card.blurbEN}</p>
+                  <p className="text-amber-100/80 text-xs md:text-lg">{card.blurbEN}</p>
                   
-                  <div className="text-amber-100/80 text-sm md:text-base leading-relaxed whitespace-pre-line">
+                  <div className="hidden sm:block text-amber-100/80 text-sm md:text-base leading-relaxed whitespace-pre-line">
                     {card.loreEN}
                   </div>
                   {/* inline narration progress */}
@@ -563,14 +565,15 @@ const audioSrc = numFromImage ? `/chars/${numFromImage}.mp3` : undefined;
                   </div>
                 </div>
 
-                {card.credits && (
-                    <div className="pt-3 mt-4">
-                      {card.credits}
-                    </div>
-                  )}
-<div className="mt-2">
-                    <a href={PACK_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded px-4 py-2 text-sm font-semibold ring-1 ring-amber-500/30 bg-zinc-900/80 hover:bg-zinc-900/60 text-amber-200">Collect this Relic</a>
-                  </div>
+                <div className="mt-3 flex items-center justify-between gap-3">
+  {card.credits && (
+    <div className="min-w-0 max-w-[60%] truncate text-amber-200/80 text-xs sm:text-sm">{card.credits}</div>
+  )}
+  <a href={PACK_URL} target="_blank" rel="noreferrer"
+     className="shrink-0 ml-auto inline-flex items-center whitespace-nowrap gap-2 px-4 py-2 rounded-xl bg-zinc-900/40 hover:bg-zinc-900/60 text-amber-200">
+     Collect this Relic
+  </a>
+</div>
                 </div>
               </div>
             
@@ -599,6 +602,7 @@ export default function App(){
   return (
     <div className="min-h-screen bg-[#060608] text-amber-100 font-serif">
       <GlazedBackdrop />
+      <BgAudio />
       <> </>
       <AnimatePresence initial={false}>
         {!showIntro && (
@@ -654,7 +658,7 @@ export default function App(){
                     </div>
                     <div className={`hidden md:block h-px w-1/2 bg-gradient-to-r ${rarityMeta[rarity].hue}`} />
                   </div>
-                  <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
+                  <motion.div className="cards-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
                     variants={{ hidden:{}, show:{ transition:{ staggerChildren:0.12, delayChildren:0.05 } } }}
                     initial="hidden" whileInView="show" viewport={{ once:true, amount:0.2 }}>
                     {grouped[rarity].map((card) => (
