@@ -9,20 +9,20 @@ const RARITY_ORDER = ["Mythical", "Legendary", "Epic", "Rare", "Common"] as cons
 type Rarity = typeof RARITY_ORDER[number];
 
 const rarityMeta: Record<Rarity, { hue: string; label: string; desc: string }> = {
-  Mythical:   { hue:"from-purple-900/70 via-fuchsia-900/60 to-indigo-900/70", label:"Mythical",  desc:"Relics whispered only in forbidden rites." },
-  Legendary:  { hue:"from-red-900/70 via-amber-900/60 to-orange-900/70",     label:"Legendary", desc:"Names carved into the cursed grimoire." },
-  Epic:       { hue:"from-emerald-900/70 via-teal-900/60 to-cyan-900/70",    label:"Epic",      desc:"Deeds sung beneath vaulted shadows." },
-  Rare:       { hue:"from-rose-900/70 via-pink-900/60 to-purple-900/70",     label:"Rare",      desc:"Faces seldom seen, often sworn in whispers." },
-  Common:     { hue:"from-zinc-800/70 via-zinc-900/60 to-black/70",          label:"Common",    desc:"Ordinary members of the Brotherhood, yet remembered by the chain." },
+  Mythical: { hue: "from-purple-900/70 via-fuchsia-900/60 to-indigo-900/70", label: "Mythical", desc: "Relics whispered only in forbidden rites." },
+  Legendary: { hue: "from-red-900/70 via-amber-900/60 to-orange-900/70", label: "Legendary", desc: "Names carved into the cursed grimoire." },
+  Epic: { hue: "from-emerald-900/70 via-teal-900/60 to-cyan-900/70", label: "Epic", desc: "Deeds sung beneath vaulted shadows." },
+  Rare: { hue: "from-rose-900/70 via-pink-900/60 to-purple-900/70", label: "Rare", desc: "Faces seldom seen, often sworn in whispers." },
+  Common: { hue: "from-zinc-800/70 via-zinc-900/60 to-black/70", label: "Common", desc: "Ordinary members of the Brotherhood, yet remembered by the chain." },
 };
 
 // Glow color under card on hover by rarity
 const glowByRarity: Record<Rarity, string> = {
-  Mythical:  "bg-teal-400/35",
+  Mythical: "bg-teal-400/35",
   Legendary: "bg-amber-400/45",
-  Epic:      "bg-fuchsia-400/40",
-  Rare:      "bg-sky-400/40",
-  Common:    "bg-zinc-100/25",
+  Epic: "bg-fuchsia-400/40",
+  Rare: "bg-sky-400/40",
+  Common: "bg-zinc-100/25",
 };
 
 /** Mapping of card number -> audio filename (without path) */
@@ -189,7 +189,7 @@ const CARDS = [
 
 
 const groupByRarity = (cards: typeof CARDS) => {
-  const map: Record<Rarity, typeof CARDS> = { Mythical:[], Legendary:[], Epic:[], Rare:[], Common:[] };
+  const map: Record<Rarity, typeof CARDS> = { Mythical: [], Legendary: [], Epic: [], Rare: [], Common: [] };
   cards.forEach(c => map[c.rarity].push(c));
   return map;
 };
@@ -229,7 +229,7 @@ const BgAudio: React.FC = () => {
 
     let started = false;
     const handler = async () => {
-      if (started) return; 
+      if (started) return;
       started = true;
       try {
         // (re)load and play both tracks
@@ -237,32 +237,32 @@ const BgAudio: React.FC = () => {
         music.currentTime = 0;
         tavern.load();
         music.load();
-        await tavern.play().catch(() => {});
+        await tavern.play().catch(() => { });
         const p = music.play(); if (p && typeof (p as any).then === "function") await p;
         setPlaying(true);
 
         // fade-in for main music only
         const target = 0.15, steps = 50, step = target / steps, interval = 10000 / steps;
-        let v = 0; 
-        const id = setInterval(() => { 
-          v = Math.min(target, v + step); 
-          music.volume = v; 
-          if (v >= target) clearInterval(id); 
+        let v = 0;
+        const id = setInterval(() => {
+          v = Math.min(target, v + step);
+          music.volume = v;
+          if (v >= target) clearInterval(id);
         }, interval);
-      } catch {}
+      } catch { }
     };
 
     // same triggers as before
     document.addEventListener("ordo:startAudio", handler);
-    const clickHandler = (e: any) => { 
-      const el = (e.target as HTMLElement); 
-      if (el?.closest?.('#ordostart')) handler(); 
+    const clickHandler = (e: any) => {
+      const el = (e.target as HTMLElement);
+      if (el?.closest?.('#ordostart')) handler();
     };
     document.addEventListener("click", clickHandler);
 
-    return () => { 
-      document.removeEventListener("ordo:startAudio", handler); 
-      document.removeEventListener("click", clickHandler); 
+    return () => {
+      document.removeEventListener("ordo:startAudio", handler);
+      document.removeEventListener("click", clickHandler);
     };
   }, []);
 
@@ -270,16 +270,16 @@ const BgAudio: React.FC = () => {
     const music = musicRef.current;
     const tavern = tavernRef.current;
     if (!music || !tavern) return;
-    if (music.paused) { 
-      try { 
-        await tavern.play(); 
-        await music.play(); 
-        setPlaying(true); 
-      } catch {} 
-    } else { 
-      music.pause(); 
-      tavern.pause(); 
-      setPlaying(false); 
+    if (music.paused) {
+      try {
+        await tavern.play();
+        await music.play();
+        setPlaying(true);
+      } catch { }
+    } else {
+      music.pause();
+      tavern.pause();
+      setPlaying(false);
     }
   };
 
@@ -304,19 +304,19 @@ const INTRO_LINES = [
   "Each is truth, each is folly, each is bound eternal in glass and chain.",
 ];
 
-const IntroScreen: React.FC<{ onEnter: () => void }>=({ onEnter })=>{
-  const voiceRef = useRef<HTMLAudioElement|null>(null);
+const IntroScreen: React.FC<{ onEnter: () => void }> = ({ onEnter }) => {
+  const voiceRef = useRef<HTMLAudioElement | null>(null);
   const [started, setStarted] = useState(false);
   const [logoDock, setLogoDock] = useState(false);
   const begin = () => {
     setStarted(true);
-    setTimeout(()=> setLogoDock(true), 150);
-    const v = voiceRef.current; if (v){ v.volume = 0.25; v.currentTime = 0; v.play().catch(()=>{}); }
+    setTimeout(() => setLogoDock(true), 150);
+    const v = voiceRef.current; if (v) { v.volume = 0.25; v.currentTime = 0; v.play().catch(() => { }); }
     document.dispatchEvent(new Event("ordo:startAudio"));
   };
   return (
     <div className="min-h-screen bg-black text-amber-200 flex items-center justify-center relative overflow-hidden">
-      <audio ref={voiceRef} src="/Intro.mp3" preload="auto"/>
+      <audio ref={voiceRef} src="/Intro.mp3" preload="auto" />
       <div className="relative w-full max-w-4xl mx-auto px-6 text-center">
         <motion.h1
           initial={{ opacity: 0, top: "28%" }}
@@ -340,18 +340,18 @@ const IntroScreen: React.FC<{ onEnter: () => void }>=({ onEnter })=>{
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}>
             <motion.div className="mt-8 md:mt-10 max-w-3xl text-lg md:text-xl italic leading-relaxed text-amber-100/90 space-y-3"
               initial="hidden" animate={logoDock ? "show" : "hidden"}
-              variants={{ hidden:{}, show:{ transition:{ staggerChildren:0.25, delayChildren:0.1 } } }}>
-              {INTRO_LINES.map((line,i)=> line==="" ? <div key={i} className="h-3"/> : (
-                <motion.p key={i} variants={{hidden:{opacity:0,y:-10},show:{opacity:1,y:0}}} transition={{duration:0.55,ease:"easeOut"}}>{line}</motion.p>
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.25, delayChildren: 0.1 } } }}>
+              {INTRO_LINES.map((line, i) => line === "" ? <div key={i} className="h-3" /> : (
+                <motion.p key={i} variants={{ hidden: { opacity: 0, y: -10 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.55, ease: "easeOut" }}>{line}</motion.p>
               ))}
-              </motion.div>
-            <motion.button onClick={()=>{ begin(); onEnter(); }} initial={{ opacity: 0, y: 16 }}
+            </motion.div>
+            <motion.button onClick={() => { begin(); onEnter(); }} initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: logoDock ? 1 : 0, y: logoDock ? 0 : 16 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.8 }}
               className="mt-10 px-6 py-3 bg-gradient-to-r from-purple-900 to-red-900 hover:from-purple-700 hover:to-red-700 ring-1 ring-amber-500/30 rounded-xl font-semibold">
               Enter the Cloister
             </motion.button>
-</motion.div>
+          </motion.div>
         )}
       </div>
     </div>
@@ -362,19 +362,19 @@ const IntroScreen: React.FC<{ onEnter: () => void }>=({ onEnter })=>{
 type Tile3DProps = { className?: string; children: React.ReactNode; onClick?: () => void; style?: React.CSSProperties; };
 function Tile3D({ className = "", children, onClick, style }: Tile3DProps) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const [s, setS] = useState({ rx:0, ry:0, tz:0, ox:50, oy:50, elev:0 });
+  const [s, setS] = useState({ rx: 0, ry: 0, tz: 0, ox: 50, oy: 50, elev: 0 });
   const onMove = (e: React.MouseEvent) => {
     const el = ref.current; if (!el) return;
     const r = el.getBoundingClientRect();
     const x = e.clientX - r.left, y = e.clientY - r.top;
     const px = (x / r.width) * 100, py = (y / r.height) * 100;
-    const ry = ((x - r.width/2) / r.width) * 20;
-    const rx = -((y - r.height/2) / r.height) * 20;
-    const dist = Math.hypot(px-50, py-50);
-    const tz = -Math.min(10, dist/1.8);
-    setS({ rx, ry, tz, ox:px, oy:py, elev:1 });
+    const ry = ((x - r.width / 2) / r.width) * 20;
+    const rx = -((y - r.height / 2) / r.height) * 20;
+    const dist = Math.hypot(px - 50, py - 50);
+    const tz = -Math.min(10, dist / 1.8);
+    setS({ rx, ry, tz, ox: px, oy: py, elev: 1 });
   };
-  const onLeave = () => setS({ rx:0, ry:0, tz:0, ox:50, oy:50, elev:0 });
+  const onLeave = () => setS({ rx: 0, ry: 0, tz: 0, ox: 50, oy: 50, elev: 0 });
   return (
     <div ref={ref} onMouseMove={onMove} onMouseLeave={onLeave} onClick={onClick}
       data-elev={s.elev}
@@ -395,17 +395,17 @@ function GlassCard({ card, onOpen }: { card: any; onOpen: (c: any) => void }) {
     >
 
       {/* Контент карточки */}
-      <div className="relative grid grid-cols-1 md:grid-cols-5 card-root">
+      <div className="light-sweep relative grid grid-cols-1 md:grid-cols-5 card-root">
         <div className="md:col-span-2">
           <div className="relative overflow-hidden rounded-l-2xl md:rounded-l-2xl md:rounded-r-none">
             <div className="relative">
-<img
-              src={card.image}
-              alt={card.name}
-              className="card-media h-full w-full object-cover object-center"
-            />
-<div className="pointer-events-none absolute inset-0 lightsweep opacity-0 md:opacity-100"></div>
-</div>
+              <img
+                src={card.image}
+                alt={card.name}
+                className="card-media h-full w-full object-cover object-center"
+              />
+              <div className="pointer-events-none absolute inset-0 opacity-0 md:opacity-100"></div>
+            </div>
           </div>
         </div>
 
@@ -425,7 +425,7 @@ function GlassCard({ card, onOpen }: { card: any; onOpen: (c: any) => void }) {
             {card.blurbEN}
           </p>
         </div>
-        
+
       </div>
     </Tile3D>
   );
@@ -433,9 +433,9 @@ function GlassCard({ card, onOpen }: { card: any; onOpen: (c: any) => void }) {
 
 
 /** ====================== Lightbox ====================== */
-function Lightbox({ card, onClose, onPrev, onNext, autoplayToken }:{ card:any, onClose:()=>void, onPrev:()=>void, onNext:()=>void, autoplayToken?: number }){
+function Lightbox({ card, onClose, onPrev, onNext, autoplayToken }: { card: any, onClose: () => void, onPrev: () => void, onNext: () => void, autoplayToken?: number }) {
   // --- Audio narration for each card ---
-  const audioRef = useRef<HTMLAudioElement|null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioReady, setAudioReady] = useState(false); // becomes true after user clicks inside the lightbox
   const [narrationEnabled, setNarrationEnabled] = useState(false);
   const [progress, setProgress] = useState(0); // 0..1
@@ -447,140 +447,161 @@ function Lightbox({ card, onClose, onPrev, onNext, autoplayToken }:{ card:any, o
   useEffect(() => { const el = document.documentElement; const prev = el.style.overflow; el.style.overflow = 'hidden'; return () => { el.style.overflow = prev || ''; }; }, []);
 
   // Build audio src by matching number from card.image or id
-  const numFromImage = (()=>{
-    const m = (card?.image||'').match(/\/([0-9]+)\./);
+  const numFromImage = (() => {
+    const m = (card?.image || '').match(/\/([0-9]+)\./);
     if (m) return m[1];
-    const m2 = (card?.id||'').match(/om-(\d+)/);
+    const m2 = (card?.id || '').match(/om-(\d+)/);
     return m2 ? m2[1] : null;
   })();
   // строим путь к аудио на основе номера карточки и карты VOICE_MAP
-const audioSrc = numFromImage ? `/chars/${numFromImage}.mp3` : undefined;
+  const audioSrc = numFromImage ? `/chars/${numFromImage}.mp3` : undefined;
 
 
-  
+
   // Auto-enable and play immediately when opened from a card click
-  useEffect(()=>{
+  useEffect(() => {
     if (autoplayToken == null) return;
     setAudioReady(true);
     setNarrationEnabled(true);
-    setPlayToken(x=>x+1);
+    setPlayToken(x => x + 1);
   }, [autoplayToken]);
-// When card changes (or navigation), schedule audio after 1s if allowed
-  useEffect(()=>{
-    if(!audioReady || !narrationEnabled) return;
-    const t = setTimeout(()=>{
+  // When card changes (or navigation), schedule audio after 1s if allowed
+  useEffect(() => {
+    if (!audioReady || !narrationEnabled) return;
+    const t = setTimeout(() => {
       const el = audioRef.current;
       if (!el) return;
-      try { el.currentTime = 0; el.play().catch(()=>{}); } catch(e) {}
+      try { el.currentTime = 0; el.play().catch(() => { }); } catch (e) { }
     }, 1000);
-    return ()=> clearTimeout(t);
+    return () => clearTimeout(t);
   }, [card?.id, playToken, audioReady, narrationEnabled]);
 
   // Restart audio when user navigates
-  useEffect(()=>{
+  useEffect(() => {
     // pause on unmount
-    return ()=>{ try { audioRef.current?.pause(); } catch(e){} };
+    return () => { try { audioRef.current?.pause(); } catch (e) { } };
   }, []);
 
   const handleLightboxActivate = () => {
     if (!audioReady) setAudioReady(true);
     // trigger a replay
-    setPlayToken(x=>x+1);
+    setPlayToken(x => x + 1);
   };
 
-  useEffect(()=>{
-    const onKey=(e:KeyboardEvent)=>{ if(e.key==='Escape') onClose(); if(e.key==='ArrowLeft') onPrev(); if(e.key==='ArrowRight') onNext(); };
-    document.addEventListener('keydown', onKey); return ()=> document.removeEventListener('keydown', onKey);
-  },[onClose,onPrev,onNext]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); if (e.key === 'ArrowLeft') onPrev(); if (e.key === 'ArrowRight') onNext(); };
+    document.addEventListener('keydown', onKey); return () => document.removeEventListener('keydown', onKey);
+  }, [onClose, onPrev, onNext]);
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose}/>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <button onClick={onPrev} className="w-12 h-12 md:w-10 md:h-10 absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 rounded-full ring-1 ring-amber-500/30 bg-zinc-900/70 hover:bg-zinc-900/60 text-amber-200 transition transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 hover:ring-2 hover:ring-amber-300/40">‹</button>
       <button onClick={onNext} className="w-12 h-12 md:w-10 md:h-10 absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 rounded-full ring-1 ring-amber-500/30 bg-zinc-900/70 hover:bg-zinc-900/60 text-amber-200 transition transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 hover:ring-2 hover:ring-amber-300/40">›</button>
       <button onClick={onClose} className="w-12 h-12 md:w-10 md:h-10 absolute top-6 right-6 z-50 rounded-full w-10 h-10 flex items-center justify-center ring-1 ring-amber-500/30 bg-zinc-900/80 hover:bg-zinc-900/60 text-amber-200 font-bold transition transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 hover:ring-2 hover:ring-amber-300/40">×</button>
       {/* narration audio element */}
       <audio ref={audioRef} preload="auto" src={audioSrc} key={audioSrc}
-        onTimeUpdate={()=>{ const el=audioRef.current; if(!el) return; setCur(el.currentTime); setDur(el.duration||0); if(el.duration>0) setProgress(el.currentTime/el.duration); }}
-        onLoadedMetadata={()=>{ const el=audioRef.current; if(!el) return; setDur(el.duration||0); }}
+        onTimeUpdate={() => { const el = audioRef.current; if (!el) return; setCur(el.currentTime); setDur(el.duration || 0); if (el.duration > 0) setProgress(el.currentTime / el.duration); }}
+        onLoadedMetadata={() => { const el = audioRef.current; if (!el) return; setDur(el.duration || 0); }}
       />
       <div className="absolute inset-0 flex items-center justify-center p-4" onClick={handleLightboxActivate}>
         <AnimatePresence mode="popLayout">
           <motion.div key={card.id}
             initial={{ opacity: 0, x: 40, scale: .98 }}
-            animate={{ opacity: 1, x: 0,  scale: 1 }}
-            exit={{    opacity: 0, x:-40, scale: .98 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -40, scale: .98 }}
             transition={{ duration: .35, ease: "easeOut" }}>
-            <Tile3D className="group relative w-full max-w-6xl max-h-[100dvh] md:max-h-[90vh] overflow-hidden rounded-2xl bg-black/70 ring-1 ring-amber-500/30 backdrop-blur-xl">
+            <Tile3D className="light-sweep group relative w-full max-w-6xl max-h-[100dvh] md:max-h-[90vh] overflow-hidden rounded-2xl bg-black/70 ring-1 ring-amber-500/30 backdrop-blur-xl">
               <div className={`pointer-events-none absolute -inset-1 opacity-25 blur-2xl bg-gradient-to-br ${rarityMeta[card.rarity].hue}`} />
               <div className="relative grid grid-cols-1 md:grid-cols-5 card-root">
-                <div className="md:col-span-2">
-                  <div className="relative overflow-hidden rounded-l-2xl md:rounded-l-2xl md:rounded-r-none">
-                    <img src={card.image} alt={card.name} className="w-full h-auto object-contain max-h-[calc(100dvh-240px)] md:max-h-[70vh]"/>
-                    <div className="pointer-events-none absolute inset-0 lightsweep"></div>
+                {/* левая колонка = flex, центрируем по X/Y */}
+                <div className="md:col-span-2 flex items-center justify-center">
+                  <div className="relative h-full w-full flex items-center justify-center overflow-hidden rounded-l-2xl md:rounded-l-2xl md:rounded-r-none p-2">
+                    <img
+                      src={card.image}
+                      alt={card.name}
+                      className="block w-auto object-contain max-h-[50vh] md:max-h-[70vh]" // убрал mt-4 и h-auto
+                    />
+                    <div className="pointer-events-none absolute inset-0" />
                   </div>
                 </div>
+
                 <div className="md:col-span-3 p-6 md:p-8 flex flex-col gap-4">
                   <div className="show-on-mobile-landscape mb-1"><Badge rarity={card.rarity} /></div>
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-  <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight text-amber-100 font-[UnifrakturCook]">{card.name}</h3>
-  <button aria-label="Toggle narration"
-    onClick={(e)=>{ e.stopPropagation(); setNarrationEnabled(x=>{ const nx=!x; if(nx && audioReady){ setPlayToken(v=>v+1);} else { try{audioRef.current?.pause()}catch(e){} } return nx; }); }}
-    className="h-8 w-8 grid place-items-center rounded-full bg-black/40 text-amber-200 ring-1 ring-amber-400/40 hover:ring-2 hover:ring-amber-300/50">
-    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current">
-      {narrationEnabled ? (
-        <path d="M3 9h4l5-5v16l-5-5H3V9zm12.5 3a3.5 3.5 0 0 0-1.7-3.02v6.04A3.5 3.5 0 0 0 15.5 12zm0-7a7 7 0 0 1 0 14v-2a5 5 0 0 0 0-10V5z"/>
-      ) : (
-        <path d="M3 9h4l5-5v16l-5-5H3V9zm15.8 7.4-1.4 1.4L14.6 15l-1.6-1.6L11 11.4 9.6 10l-3-3 1.4-1.4 12.8 12.8z"/>
-      )}
-    </svg>
-  </button>
-</div>
-<div className="hide-on-mobile-landscape"><Badge rarity={card.rarity} /></div>
+                      <h3 className="text-2xl sm:text-2xl md:text-5xl font-extrabold tracking-tight text-amber-100 font-[UnifrakturCook]">
+                        {card.name}
+                      </h3>
+
+                      <button aria-label="Toggle narration"
+                        onClick={(e) => { e.stopPropagation(); setNarrationEnabled(x => { const nx = !x; if (nx && audioReady) { setPlayToken(v => v + 1); } else { try { audioRef.current?.pause() } catch (e) { } } return nx; }); }}
+                        className="h-8 w-8 grid place-items-center rounded-full bg-black/40 text-amber-200 ring-1 ring-amber-400/40 hover:ring-2 hover:ring-amber-300/50">
+                        <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current">
+                          {narrationEnabled ? (
+                            <path d="M3 9h4l5-5v16l-5-5H3V9zm12.5 3a3.5 3.5 0 0 0-1.7-3.02v6.04A3.5 3.5 0 0 0 15.5 12zm0-7a7 7 0 0 1 0 14v-2a5 5 0 0 0 0-10V5z" />
+                          ) : (
+                            <path d="M3 9h4l5-5v16l-5-5H3V9zm15.8 7.4-1.4 1.4L14.6 15l-1.6-1.6L11 11.4 9.6 10l-3-3 1.4-1.4 12.8 12.8z" />
+                          )}
+                        </svg>
+                      </button>
+                    </div>
+                    <div className="hide-on-mobile-landscape"><Badge rarity={card.rarity} /></div>
                   </div>
                   <p className="text-amber-200/60 text-base md:text-lg italic">{card.role}</p>
                   <p className="text-amber-100/80 text-xs md:text-lg">{card.blurbEN}</p>
-                  
+
                   <div className="hidden sm:block text-amber-100/80 text-sm md:text-base leading-relaxed whitespace-pre-line">
                     {card.loreEN}
                   </div>
                   {/* inline narration progress */}
-                <div className="mt-4">
-                  <div className="flex items-center justify-between text-amber-200/60 text-xs mb-1">
-                    <span>Narration</span>
-                    <span>{new Date(cur*1000).toISOString().substring(14,19)} / {dur? new Date(dur*1000).toISOString().substring(14,19) : "00:00"}</span>
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between text-amber-200/60 text-xs mb-1">
+                      <span>Narration</span>
+                      <span>{new Date(cur * 1000).toISOString().substring(14, 19)} / {dur ? new Date(dur * 1000).toISOString().substring(14, 19) : "00:00"}</span>
+                    </div>
+                    <div
+                      role="progressbar" aria-label="Seek narration" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100) || 0}
+                      onClick={(e) => {
+                        const el = e.currentTarget as HTMLDivElement;
+                        const rect = el.getBoundingClientRect();
+                        const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+                        try {
+                          if (audioRef.current && dur > 0) { audioRef.current.currentTime = ratio * dur; setProgress(ratio); }
+                        } catch (e) { }
+                      }}
+                      className="h-[6px] w-full rounded-full bg-amber-200/20 overflow-hidden cursor-pointer ring-1 ring-amber-400/20">
+                      <div className="h-full bg-amber-300/70" style={{ width: `${(progress * 100) || 0}%` }} />
+                    </div>
                   </div>
-                  <div
-                    role="progressbar" aria-label="Seek narration" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress*100)||0}
-                    onClick={(e)=>{
-                      const el = e.currentTarget as HTMLDivElement;
-                      const rect = el.getBoundingClientRect();
-                      const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left)/rect.width));
-                      try {
-                        if(audioRef.current && dur>0){ audioRef.current.currentTime = ratio*dur; setProgress(ratio); }
-                      } catch(e){}
-                    }}
-                    className="h-[6px] w-full rounded-full bg-amber-200/20 overflow-hidden cursor-pointer ring-1 ring-amber-400/20">
-                    <div className="h-full bg-amber-300/70" style={{ width: `${(progress*100)||0}%` }} />
-                  </div>
-                </div>
 
-                <div className="mt-3 flex items-center justify-between gap-3">
-  {card.credits && (
-    <div className="min-w-0 max-w-[60%] truncate text-amber-200/80 text-xs sm:text-sm">{card.credits}</div>
-  )}
-  <a href={PACK_URL} target="_blank" rel="noreferrer"
-     className="shrink-0 ml-auto inline-flex items-center whitespace-nowrap gap-2 px-4 py-2 rounded-xl bg-zinc-900/40 hover:bg-zinc-900/60 text-amber-200">
-     Collect this Relic
-  </a>
-</div>
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    {card.credits && (
+                      <div className="min-w-0 max-w-[60%] truncate text-amber-200/80 text-xs sm:text-sm">{card.credits}</div>
+                    )}
+                    <a
+                      href={PACK_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="shrink-0 ml-auto inline-flex items-center whitespace-nowrap gap-2
+             px-4 py-2 rounded-xl
+             bg-zinc-900/40 text-amber-200
+             ring-1 ring-amber-400/30
+             transition duration-300 ease-out
+             hover:bg-zinc-900/60 hover:ring-amber-300/60
+             hover:shadow-[0_0_18px_4px_rgba(251,191,36,0.35)]
+             focus:outline-none focus:ring-2 focus:ring-amber-300/70"
+                    >
+                      Collect this Relic
+                    </a>
+
+                  </div>
                 </div>
               </div>
-            
+
               {/* Narration progress bar */}
-              
-</Tile3D>
-</motion.div>
+
+            </Tile3D>
+          </motion.div>
         </AnimatePresence>
       </div>
     </div>
@@ -588,7 +609,7 @@ const audioSrc = numFromImage ? `/chars/${numFromImage}.mp3` : undefined;
 }
 
 /** ====================== Page ====================== */
-export default function App(){
+export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const [showIntro, setShowIntro] = useState(true);
@@ -596,7 +617,7 @@ export default function App(){
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [autoplayToken, setAutoplayToken] = useState(0);
 
-  const list = filter==="All" ? CARDS : CARDS.filter(c=>c.rarity===filter);
+  const list = filter === "All" ? CARDS : CARDS.filter(c => c.rarity === filter);
   const grouped = groupByRarity(list);
 
   return (
@@ -619,16 +640,16 @@ export default function App(){
       </AnimatePresence>
       <AnimatePresence initial={false}>
         {showIntro ? (
-          <IntroScreen key="intro" onEnter={()=> setShowIntro(false)} />
+          <IntroScreen key="intro" onEnter={() => setShowIntro(false)} />
         ) : (
           <motion.main key="main" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-           
+
 
             <section className="relative mx-auto max-w-4xl px-4 py-16 text-center">
               <h1 className="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight text-amber-200 drop-shadow-[0_2px_8px_rgba(255,200,0,0.15)] font-[UnifrakturCook]">The Ordo Memeticus</h1>
               <p className="mt-6 text-lg md:text-xl text-amber-100/90 italic max-w-3xl mx-auto">"In glass and chain our brethren endure — saints and sinners, martyrs and jesters, villains crowned in shame. Take a relic, and be bound to the brotherhood eternal."</p>
               <div className="mt-10 flex justify-center gap-4">
-                <a href={PACK_URL} target="_blank" rel="noreferrer" className="rounded-xl px-6 py-3 font-semibold bg-gradient-to-r from-purple-900 to-red-900 hover:from-purple-700 hover:to-red-700 ring-1 ring-amber-500/30">Enter the Pack</a>
+                <a href={PACK_URL} target="_blank" rel="noreferrer" className="rounded-xl px-6 py-3 font-semibold bg-gradient-to-r from-purple-900 to-red-900 hover:from-purple-700 hover:to-red-700 ring-1 ring-amber-500/30">Collect the Relics</a>
                 <button className="rounded-xl px-6 py-3 font-semibold bg-zinc-900/70 ring-1 ring-amber-500/30 hover:bg-zinc-900/90 text-amber-200" onClick={() => document.getElementById('relics')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>View Relics</button>
               </div>
             </section>
@@ -641,8 +662,8 @@ export default function App(){
                 <h2 className="text-2xl md:text-3xl font-bold text-amber-100 font-[UnifrakturCook]">Relics of the Dark Brotherhood</h2>
                 <div className="flex flex-wrap items-center gap-2">
                   {(["All", ...RARITY_ORDER] as Array<"All" | Rarity>).map((r) => (
-                    <button key={r} onClick={()=> setFilter(r)}
-                      className={`px-3 py-1.5 rounded-full text-sm ring-1 ring-amber-500/30 transition ${filter===r? "bg-amber-600/30 text-amber-100":"bg-zinc-900/60 text-amber-200/70 hover:bg-zinc-900/80"}`}>
+                    <button key={r} onClick={() => setFilter(r)}
+                      className={`px-3 py-1.5 rounded-full text-sm ring-1 ring-amber-500/30 transition ${filter === r ? "bg-amber-600/30 text-amber-100" : "bg-zinc-900/60 text-amber-200/70 hover:bg-zinc-900/80"}`}>
                       {r}
                     </button>
                   ))}
@@ -659,11 +680,11 @@ export default function App(){
                     <div className={`hidden md:block h-px w-1/2 bg-gradient-to-r ${rarityMeta[rarity].hue}`} />
                   </div>
                   <motion.div className="cards-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
-                    variants={{ hidden:{}, show:{ transition:{ staggerChildren:0.12, delayChildren:0.05 } } }}
-                    initial="hidden" whileInView="show" viewport={{ once:true, amount:0.2 }}>
+                    variants={{ hidden: {}, show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } } }}
+                    initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
                     {grouped[rarity].map((card) => (
-                      <motion.div key={card.id} variants={{ hidden:{opacity:0,y:12,scale:0.98}, show:{opacity:1,y:0,scale:1, transition:{duration:0.45,ease:"easeOut"}} }}>
-                        <GlassCard card={card} onOpen={(c)=> { setLightboxIndex(list.findIndex(x=>x.id===c.id)); setAutoplayToken(t=>t+1);} } /></motion.div>
+                      <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 12, scale: 0.98 }, show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.45, ease: "easeOut" } } }}>
+                        <GlassCard card={card} onOpen={(c) => { setLightboxIndex(list.findIndex(x => x.id === c.id)); setAutoplayToken(t => t + 1); }} /></motion.div>
                     ))}</motion.div>
                 </div>
               ))}
@@ -673,11 +694,11 @@ export default function App(){
               <Lightbox
                 card={list[lightboxIndex]}
                 autoplayToken={autoplayToken}
-                onClose={()=> setLightboxIndex(null)}
-                onPrev={()=> setLightboxIndex((i)=>{
+                onClose={() => setLightboxIndex(null)}
+                onPrev={() => setLightboxIndex((i) => {
                   const L = list.length; if (i == null) return 0; return (i - 1 + L) % L;
                 })}
-                onNext={()=> setLightboxIndex((i)=>{
+                onNext={() => setLightboxIndex((i) => {
                   const L = list.length; if (i == null) return 0; return (i + 1) % L;
                 })}
               />
@@ -685,7 +706,7 @@ export default function App(){
 
             <footer className="relative border-t border-amber-500/20 bg-black/80">
               <div className="mx-auto max-w-6xl px-4 py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="text-amber-200/80 text-sm rounded-md ring-1 ring-amber-500/30 px-3 py-2 bg-black/20">Created by <a href="https://x.com/scream_vision" target="_blank" rel="noreferrer" className="underline decoration-amber-400/60 hover:decoration-amber-300 hover:text-amber-100">Scream.Vision</a></div>
+                <div className="text-amber-200/80 text-sm rounded-md ring-1 ring-amber-500/30 px-3 py-2 bg-black/20">Created by <a href="https://x.com/scream_vision" target="_blank" rel="noreferrer" className="underline decoration-amber-400/60 hover:decoration-amber-300 hover:text-amber-100">Scream.Vision</a></div>
 
                 <div className="space-y-2">
                   <div className="text-amber-200 font-semibold tracking-wide font-[UnifrakturCook]">ORDO MEMETICUS</div>
