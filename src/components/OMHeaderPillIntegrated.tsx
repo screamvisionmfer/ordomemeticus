@@ -8,10 +8,11 @@ import React, { useEffect, useState } from "react";
 
 /** Replace with your real links */
 export const LINKS = {
+  join: "https://vibemarket.com/market/ordo-memeticus?ref=B3FLA1AGGOH2", // or route/modals anchor
   twitter: "https://x.com/scream_vision",
   farcaster: "https://farcaster.xyz/screamvision",
   linktree: "https://linktr.ee/screamvision",
-  join: "https://vibemarket.com/market/ordo-memeticus?ref=B3FLA1AGGOH2", // or route/modals anchor
+  
 };
 
 const IconBurger = ({ className }: { className?: string }) => (
@@ -45,7 +46,7 @@ const OMHeaderPillIntegrated: React.FC = () => {
   const linkCls = "no-icon text-amber-100/90 hover:text-amber-100";
 
   return (
-    <header className="sticky top-0 z-40">
+    <header className="fixed top-0 left-0 w-full z-40">
       <div className="backdrop-blur-xl bg-black/70 ring-1 ring-amber-500/20 border-b border-amber-500/20">
         <div className="mx-auto max-w-6xl px-4 py-2 md:py-3">
 
@@ -56,10 +57,11 @@ const OMHeaderPillIntegrated: React.FC = () => {
               <span className="text-xl tracking-wide text-amber-100 font-[UnifrakturCook]">ORDO MEMETICUS</span>
             </a>
             <div className="flex items-center gap-6">
+              
               <a href={LINKS.twitter} target="_blank" rel="noreferrer" className={linkCls}>Twitter</a>
               <a href={LINKS.farcaster} target="_blank" rel="noreferrer" className={linkCls}>Farcaster</a>
               <a href={LINKS.linktree} target="_blank" rel="noreferrer" className={linkCls}>Linktree</a>
-              <a href={LINKS.join} className="inline-flex items-center px-4 py-2 text-sm font-semibold uppercase tracking-wide text-amber-900 bg-amber-300 hover:bg-amber-200 transition">
+              <a href={LINKS.join} className="inline-flex items-center px-3 py-2 text-sm font-semibold uppercase tracking-wide btn-medieval is-gilded is-sm">
                 Join the Brotherhood
               </a>
             </div>
@@ -102,12 +104,12 @@ const OMHeaderPillIntegrated: React.FC = () => {
                 <SigilOM className="w-8 h-8 text-amber-300" />
                 <span className="text-xl tracking-wide font-[UnifrakturCook]">ORDO MEMETICUS</span>
               </div>
-              <a href={LINKS.twitter} className="text-3xl no-icon">Twitter</a>
-              <a href={LINKS.farcaster} className="text-3xl no-icon">Farcaster</a>
-              <a href={LINKS.linktree} className="text-3xl no-icon">Linktree</a>
-              <a href={LINKS.join} className="mt-2 inline-flex items-center px-5 py-2 text-base font-semibold uppercase tracking-wide text-amber-900 bg-amber-300 hover:bg-amber-200">
+              <a href={LINKS.join} className="mt-2 inline-flex items-center px-5 py-2 text-base btn-medieval is-gilded is-full">
                 Join the Brotherhood
               </a>
+              <a href={LINKS.twitter} className="text-2xl font-[UnifrakturCook] no-icon">Twitter</a>
+              <a href={LINKS.farcaster} className="text-2xl font-[UnifrakturCook] no-icon">Farcaster</a>
+              <a href={LINKS.linktree} className="text-2xl font-[UnifrakturCook] no-icon">Linktree</a>
             </div>
           </div>
         </div>

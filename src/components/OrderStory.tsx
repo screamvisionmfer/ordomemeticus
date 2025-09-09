@@ -21,14 +21,29 @@ export default function OrderStory() {
       <div className="rounded-2xl ring-1 ring-amber-700/30 bg-gradient-to-b from-[#1a1206] to-[#120c05] shadow-[inset_0_1px_0_rgba(255,220,120,.06),0_10px_40px_rgba(0,0,0,.35)] overflow-hidden">
         <div className="p-6 md:p-10 lg:p-14">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="font-[UnifrakturCook] text-2xl md:text-4xl text-amber-200">The Chronicle of the Ordo</h2>
+            <h2 className="font-[UnifrakturCook] text-xl md:text-4xl text-amber-200">The Chronicle of the Ordo</h2>
             <button
-              onClick={()=> setOpen(v=>!v)}
+              onClick={() => {
+                setOpen(v => {
+                  const newVal = !v;
+                  if (!v) {
+                    // если текст открывается, плавно скроллим к нему
+                    setTimeout(() => {
+                      document.getElementById('order-story')?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                      });
+                    }, 300); // задержка = время анимации открытия
+                  }
+                  return newVal;
+                });
+              }}
               aria-expanded={open}
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold bg-gradient-to-b from-amber-400/90 to-amber-600/90 text-black ring-1 ring-amber-700/40 shadow-[inset_0_1px_0_rgba(255,255,255,.25),0_6px_20px_rgba(0,0,0,.25)] transition hover:translate-y-0.5 hover:shadow-[inset_0_1px_0_rgba(255,255,255,.35),0_10px_28px_rgba(0,0,0,.35)]"
+              className="btn-medieval is-rune is-md is-sm"
             >
-              {open ? "Hide Chronicle" : "Read the Chronicle"}
+              {open ? "Hide" : "Read"}
             </button>
+
           </div>
 
           <div className={open ? "mt-6 grid gap-4 md:text-lg text-amber-200/80 transition-all" : "mt-0 max-h-0 overflow-hidden transition-all duration-300"} style={{ transitionProperty: "max-height, margin-top" }}>

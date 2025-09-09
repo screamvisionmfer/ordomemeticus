@@ -300,3 +300,86 @@ body,
     }
   }
 }
+@layer utilities {
+
+  /* 3D-контекст */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  /* родительская «плита», куда применяем наклон */
+  .tilt-3d {
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform .15s ease-out;
+    will-change: transform;
+  }
+
+  /* сам арт — «поднимем» над плитой и даём микросдвиг */
+  .lift-3d {
+    transform:
+      translateZ(var(--tz, 0px)) translateX(var(--tx, 0px)) translateY(var(--ty, 0px));
+    transition: transform .15s ease-out;
+    will-change: transform;
+  }
+
+  /* мягкая тень, чтобы чувствовалась высота */
+  .parallax-shadow {
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+  }
+
+  /* анимации отключаем тем, кто их просил убрать */
+  @media (prefers-reduced-motion: reduce) {
+
+    .tilt-3d,
+    .lift-3d {
+      transition: none;
+    }
+  }
+}
+
+
+/* Center card image on mobile landscape */
+@media (orientation: landscape) and (max-width: 767px) {
+  .media-center-on-mobile-landscape {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+/* Intro-screen responsive text fixes */
+@media (max-width: 767px) {
+  .intro-title {
+    font-size: 1.5rem;
+    /* ~24px вместо огромного */
+    line-height: 1.2;
+  }
+
+  .intro-text {
+    font-size: 0.9rem;
+    /* ~14px */
+    line-height: 1.4;
+    padding: 0 0.5rem;
+    /* чуть сжать поля */
+  }
+}
+
+@media (max-width: 1023px) {
+  .intro-title {
+    font-size: 1.75rem;
+    /* средние экраны — чуть меньше, чем desktop */
+    line-height: 1.3;
+  }
+
+  .intro-text {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}
