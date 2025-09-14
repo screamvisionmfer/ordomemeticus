@@ -390,11 +390,7 @@ body,
   /* --- Main cards grid: make all items equal height --- */
   .cards-grid > * { height: 100%; }
   .cards-grid > * > * { height: 100%; }
-  .card-root { height: 100%; display: flex; flex-direction: column; }
-  .card-root .card-media { aspect-ratio: 3 / 4; width: 100%; }
-  .card-root .card-content { flex: 1 1 auto; display: flex; flex-direction: column; }
-
-  /* --- Fullscreen card (lightbox) behaves like phone --- */
+  .card-root { height: 100%; display: flex; flex-direction: column; }/* --- Fullscreen card (lightbox) behaves like phone --- */
   /* Root overlay */
   .fixed.inset-0.z-50 { padding: 0; }
   /* Dialog container (Tile3D/light-sweep wrapper) */
@@ -439,5 +435,19 @@ body,
   .fixed.inset-0.z-50 .actions, 
   .fixed.inset-0.z-50 .btn-row {
     display: flex; flex-wrap: wrap; gap: 8px;
+  }
+}
+/* === Tablet Portrait: uniform card size via scale === */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  .cards-grid>* {
+    transform: scale(0.85);
+    transform-origin: top center;
+    /* можно center center, если нужно ровно по середине */
+  }
+
+  /* Чтобы сетка не «рассыпалась» из-за скейла */
+  .cards-grid {
+    gap: 1rem;
+    /* зазор между карточками, можешь подправить */
   }
 }
