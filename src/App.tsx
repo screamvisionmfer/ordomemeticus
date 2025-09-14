@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import OrderStory from "./components/OrderStory";
 import { motion, AnimatePresence } from "framer-motion";
-
+import CeremonialBlock from "@/components/CeremonialBlock";
 import OMHeaderPillIntegrated from "./components/OMHeaderPillIntegrated";
 
 
@@ -734,7 +734,7 @@ export default function App() {
             </div>
 
               <section id="order-story"><OrderStory/></section>
-
+              <CeremonialBlock />
 
             <section id="relics" className="relative mx-auto max-w-6xl px-4 pb-24">
               <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
