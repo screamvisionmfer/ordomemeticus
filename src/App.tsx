@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import OrderStory from "./components/OrderStory";
 import { motion, AnimatePresence } from "framer-motion";
-
+import CeremonialBlock from "@/components/CeremonialBlock";
 import OMHeaderPillIntegrated from "./components/OMHeaderPillIntegrated";
 
 
@@ -252,53 +252,123 @@ const BgAudio: React.FC = () => {
   const tavernRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setPlaying] = useState(false);
 
+  // Effect #1: prepare and start on CTA/click, fade-in
   useEffect(() => {
     const music = musicRef.current;
     const tavern = tavernRef.current;
     if (!music || !tavern) return;
 
-    // start volumes
-    music.volume = 0.0;   // will fade-in to ~0.15
-    tavern.volume = 0.1;  // ~10% as requested (no fade necessary)
+    // initial volumes & loop
+    music.volume = 0.0;     // fade-in to ~0.15
+    tavern.volume = 0.1;    // tavern ambience
     tavern.loop = true;
     music.loop = true;
 
     let started = false;
-    const handler = async () => {
+
+    async function start() {
       if (started) return;
       started = true;
       try {
-        // (re)load and play both tracks
-        tavern.currentTime = 0;
         music.currentTime = 0;
-        tavern.load();
-        music.load();
-        await tavern.play().catch(() => { });
-        const p = music.play(); if (p && typeof (p as any).then === "function") await p;
+        tavern.currentTime = 0;
+        await tavern.play();
+        await music.play();
         setPlaying(true);
 
-        // fade-in for main music only
-        const target = 0.15, steps = 50, step = target / steps, interval = 10000 / steps;
-        let v = 0;
-        const id = setInterval(() => {
-          v = Math.min(target, v + step);
-          music.volume = v;
-          if (v >= target) clearInterval(id);
-        }, interval);
-      } catch { }
-    };
+        // fade-in bg music
+        const target = 0.15;
+        const dur = 1200;
+        const t0 = performance.now();
+        const v0 = music.volume;
+        const step = (ts: number) => {
+          const p = Math.min((ts - t0) / dur, 1);
+          music.volume = v0 + (target - v0) * p;
+          if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      } catch {}
+    }
 
-    // same triggers as before
-    document.addEventListener("ordo:startAudio", handler);
-    const clickHandler = (e: any) => {
+    const onStart = () => start();
+    const onClick = (e: any) => {
       const el = (e.target as HTMLElement);
-      if (el?.closest?.('#ordostart')) handler();
+      if (el?.closest?.('#ordostart')) start();
     };
-    document.addEventListener("click", clickHandler);
 
+    document.addEventListener("ordo:startAudio", onStart);
+    document.addEventListener("click", onClick);
     return () => {
-      document.removeEventListener("ordo:startAudio", handler);
-      document.removeEventListener("click", clickHandler);
+      document.removeEventListener("ordo:startAudio", onStart);
+      document.removeEventListener("click", onClick);
+    };
+  }, []);
+
+  // Effect #2: pause with fade-out when hidden, resume with fade-in when visible
+  useEffect(() => {
+    const music = musicRef.current;
+    const tavern = tavernRef.current;
+    if (!music || !tavern) return;
+    let rafId: number | null = null;
+
+    const fadeOutAndPause = () => {
+      const vm0 = music.volume;
+      const vt0 = tavern.volume;
+      const t0 = performance.now();
+      const DUR = 600;
+
+      const step = (ts: number) => {
+        const p = Math.min((ts - t0) / DUR, 1);
+        music.volume = vm0 * (1 - p);
+        tavern.volume = vt0 * (1 - p);
+        if (p < 1) {
+          rafId = requestAnimationFrame(step);
+        } else {
+          music.pause();
+          tavern.pause();
+          setPlaying(false);
+          // restore volumes for next start
+          music.volume = vm0;
+          tavern.volume = vt0;
+        }
+      };
+
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(step);
+    };
+
+    const resumeWithFadeIn = async () => {
+      try {
+        await tavern.play();
+        await music.play();
+        setPlaying(true);
+        const vmTarget = 0.15;
+        const vtTarget = 0.10;
+        const t0 = performance.now();
+        const DUR = 800;
+        const vmStart = 0.0;
+        const vtStart = 0.0;
+        music.volume = vmStart;
+        tavern.volume = vtStart;
+        const step = (ts: number) => {
+          const p = Math.min((ts - t0) / DUR, 1);
+          music.volume = vmStart + (vmTarget - vmStart) * p;
+          tavern.volume = vtStart + (vtTarget - vtStart) * p;
+          if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      } catch {}
+    };
+
+    const onVisibility = () => {
+      if (document.hidden) fadeOutAndPause();
+      else resumeWithFadeIn();
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, []);
 
@@ -311,7 +381,7 @@ const BgAudio: React.FC = () => {
         await tavern.play();
         await music.play();
         setPlaying(true);
-      } catch { }
+      } catch {}
     } else {
       music.pause();
       tavern.pause();
@@ -320,16 +390,18 @@ const BgAudio: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-40">
-      <audio ref={musicRef} src={BG_SRC} loop preload="auto" />
-      <audio ref={tavernRef} src={TAVERN_SRC} loop preload="auto" />
-      <button onClick={toggle}
-        className="rounded-full px-4 py-2 text-sm font-semibold bg-zinc-900/80 hover:bg-zinc-900/60 ring-1 ring-amber-500/30 text-amber-200 shadow-lg">
+    <>
+      <audio ref={musicRef} src={BG_SRC} preload="auto" />
+      <audio ref={tavernRef} src={TAVERN_SRC} preload="auto" />
+      <button
+        onClick={toggle}
+        className="fixed right-3 bottom-3 z-40 rounded-full bg-amber-600/80 text-black text-xs px-3 py-1 ring-1 ring-amber-400/60 hover:bg-amber-500/90"
+      >
         {isPlaying ? "Pause Music" : "Play Music"}
       </button>
-    </div>
+    </>
   );
-};
+};;
 /** ====================== Intro ====================== */
 const INTRO_LINES = [
   "Hear these words, ye who stand before the glass.",
@@ -734,7 +806,7 @@ export default function App() {
             </div>
 
               <section id="order-story"><OrderStory/></section>
-
+              <CeremonialBlock />
 
             <section id="relics" className="relative mx-auto max-w-6xl px-4 pb-24">
               <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">

@@ -383,3 +383,13 @@ body,
     line-height: 1.5;
   }
 }
+
+
+/* --- Tablet portrait fixes for cards layout --- */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .cards-grid > * { height: 100%; }
+  .card-root { height: 100%; display: flex; flex-direction: column; transform: scale(0.96); transform-origin: top center; }
+}
+
+/* Optional helpers if present */
+.card-root .card-content { flex: 1 1 auto; }
