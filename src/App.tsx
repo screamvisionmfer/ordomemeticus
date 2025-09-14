@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import OrderStory from "./components/OrderStory";
 import { motion, AnimatePresence } from "framer-motion";
-import CeremonialBlock from "@/components/CeremonialBlock";
+
 import OMHeaderPillIntegrated from "./components/OMHeaderPillIntegrated";
 
 
@@ -252,123 +252,53 @@ const BgAudio: React.FC = () => {
   const tavernRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setPlaying] = useState(false);
 
-  // Effect #1: prepare and start on CTA/click, fade-in
   useEffect(() => {
     const music = musicRef.current;
     const tavern = tavernRef.current;
     if (!music || !tavern) return;
 
-    // initial volumes & loop
-    music.volume = 0.0;     // fade-in to ~0.15
-    tavern.volume = 0.1;    // tavern ambience
+    // start volumes
+    music.volume = 0.0;   // will fade-in to ~0.15
+    tavern.volume = 0.1;  // ~10% as requested (no fade necessary)
     tavern.loop = true;
     music.loop = true;
 
     let started = false;
-
-    async function start() {
+    const handler = async () => {
       if (started) return;
       started = true;
       try {
-        music.currentTime = 0;
+        // (re)load and play both tracks
         tavern.currentTime = 0;
-        await tavern.play();
-        await music.play();
+        music.currentTime = 0;
+        tavern.load();
+        music.load();
+        await tavern.play().catch(() => { });
+        const p = music.play(); if (p && typeof (p as any).then === "function") await p;
         setPlaying(true);
 
-        // fade-in bg music
-        const target = 0.15;
-        const dur = 1200;
-        const t0 = performance.now();
-        const v0 = music.volume;
-        const step = (ts: number) => {
-          const p = Math.min((ts - t0) / dur, 1);
-          music.volume = v0 + (target - v0) * p;
-          if (p < 1) requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
-      } catch {}
-    }
+        // fade-in for main music only
+        const target = 0.15, steps = 50, step = target / steps, interval = 10000 / steps;
+        let v = 0;
+        const id = setInterval(() => {
+          v = Math.min(target, v + step);
+          music.volume = v;
+          if (v >= target) clearInterval(id);
+        }, interval);
+      } catch { }
+    };
 
-    const onStart = () => start();
-    const onClick = (e: any) => {
+    // same triggers as before
+    document.addEventListener("ordo:startAudio", handler);
+    const clickHandler = (e: any) => {
       const el = (e.target as HTMLElement);
-      if (el?.closest?.('#ordostart')) start();
+      if (el?.closest?.('#ordostart')) handler();
     };
+    document.addEventListener("click", clickHandler);
 
-    document.addEventListener("ordo:startAudio", onStart);
-    document.addEventListener("click", onClick);
     return () => {
-      document.removeEventListener("ordo:startAudio", onStart);
-      document.removeEventListener("click", onClick);
-    };
-  }, []);
-
-  // Effect #2: pause with fade-out when hidden, resume with fade-in when visible
-  useEffect(() => {
-    const music = musicRef.current;
-    const tavern = tavernRef.current;
-    if (!music || !tavern) return;
-    let rafId: number | null = null;
-
-    const fadeOutAndPause = () => {
-      const vm0 = music.volume;
-      const vt0 = tavern.volume;
-      const t0 = performance.now();
-      const DUR = 600;
-
-      const step = (ts: number) => {
-        const p = Math.min((ts - t0) / DUR, 1);
-        music.volume = vm0 * (1 - p);
-        tavern.volume = vt0 * (1 - p);
-        if (p < 1) {
-          rafId = requestAnimationFrame(step);
-        } else {
-          music.pause();
-          tavern.pause();
-          setPlaying(false);
-          // restore volumes for next start
-          music.volume = vm0;
-          tavern.volume = vt0;
-        }
-      };
-
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(step);
-    };
-
-    const resumeWithFadeIn = async () => {
-      try {
-        await tavern.play();
-        await music.play();
-        setPlaying(true);
-        const vmTarget = 0.15;
-        const vtTarget = 0.10;
-        const t0 = performance.now();
-        const DUR = 800;
-        const vmStart = 0.0;
-        const vtStart = 0.0;
-        music.volume = vmStart;
-        tavern.volume = vtStart;
-        const step = (ts: number) => {
-          const p = Math.min((ts - t0) / DUR, 1);
-          music.volume = vmStart + (vmTarget - vmStart) * p;
-          tavern.volume = vtStart + (vtTarget - vtStart) * p;
-          if (p < 1) requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
-      } catch {}
-    };
-
-    const onVisibility = () => {
-      if (document.hidden) fadeOutAndPause();
-      else resumeWithFadeIn();
-    };
-
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => {
-      document.removeEventListener("visibilitychange", onVisibility);
-      if (rafId) cancelAnimationFrame(rafId);
+      document.removeEventListener("ordo:startAudio", handler);
+      document.removeEventListener("click", clickHandler);
     };
   }, []);
 
@@ -381,7 +311,7 @@ const BgAudio: React.FC = () => {
         await tavern.play();
         await music.play();
         setPlaying(true);
-      } catch {}
+      } catch { }
     } else {
       music.pause();
       tavern.pause();
@@ -390,18 +320,16 @@ const BgAudio: React.FC = () => {
   };
 
   return (
-    <>
-      <audio ref={musicRef} src={BG_SRC} preload="auto" />
-      <audio ref={tavernRef} src={TAVERN_SRC} preload="auto" />
-      <button
-        onClick={toggle}
-        className="fixed right-3 bottom-3 z-40 rounded-full bg-amber-600/80 text-black text-xs px-3 py-1 ring-1 ring-amber-400/60 hover:bg-amber-500/90"
-      >
+    <div className="fixed bottom-4 right-4 z-40">
+      <audio ref={musicRef} src={BG_SRC} loop preload="auto" />
+      <audio ref={tavernRef} src={TAVERN_SRC} loop preload="auto" />
+      <button onClick={toggle}
+        className="rounded-full px-4 py-2 text-sm font-semibold bg-zinc-900/80 hover:bg-zinc-900/60 ring-1 ring-amber-500/30 text-amber-200 shadow-lg">
         {isPlaying ? "Pause Music" : "Play Music"}
       </button>
-    </>
+    </div>
   );
-};;
+};
 /** ====================== Intro ====================== */
 const INTRO_LINES = [
   "Hear these words, ye who stand before the glass.",
@@ -560,7 +488,7 @@ function GlassCard({ card, onOpen }: { card: any; onOpen: (c: any) => void }) {
         <div className="md:col-span-3 p-5 md:p-7 flex flex-col gap-4 card-body">
           <div className="show-on-mobile-landscape mb-1"><Badge rarity={card.rarity} /></div>
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-xl md:text-2xl font-semibold tracking-tight text-amber-100/90">
+            <h3 className="lightbox-title text-xl md:text-2xl font-semibold tracking-tight text-amber-100/90">
               {card.name}
             </h3>
             <div className="hide-on-mobile-landscape"><Badge rarity={card.rarity} /></div>
@@ -641,7 +569,7 @@ function Lightbox({ card, onClose, onPrev, onNext, autoplayToken }: { card: any,
     document.addEventListener('keydown', onKey); return () => document.removeEventListener('keydown', onKey);
   }, [onClose, onPrev, onNext]);
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 lightbox-root">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <button onClick={onPrev} className="w-12 h-12 md:w-10 md:h-10 absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 rounded-full ring-1 ring-amber-500/30 bg-zinc-900/70 hover:bg-zinc-900/60 text-amber-200 transition transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 hover:ring-2 hover:ring-amber-300/40">‹</button>
       <button onClick={onNext} className="w-12 h-12 md:w-10 md:h-10 absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 rounded-full ring-1 ring-amber-500/30 bg-zinc-900/70 hover:bg-zinc-900/60 text-amber-200 transition transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 hover:ring-2 hover:ring-amber-300/40">›</button>
@@ -658,12 +586,12 @@ function Lightbox({ card, onClose, onPrev, onNext, autoplayToken }: { card: any,
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -40, scale: .98 }}
             transition={{ duration: .35, ease: "easeOut" }}>
-            <Tile3D className="light-sweep group relative w-full max-w-6xl max-h-[100dvh] md:max-h-[90vh] overflow-hidden rounded-2xl bg-black/70 ring-1 ring-amber-500/30 backdrop-blur-xl">
+            <Tile3D className="light-sweep group relative w-full lightbox-dialog max-w-6xl max-h-[100dvh] md:max-h-[90vh] overflow-hidden rounded-2xl bg-black/70 ring-1 ring-amber-500/30 backdrop-blur-xl">
               <div className={`pointer-events-none absolute -inset-1 opacity-25 blur-2xl bg-gradient-to-br ${rarityMeta[card.rarity].hue}`} />
               <div className="relative grid grid-cols-1 md:grid-cols-5 card-root">
                 {/* левая колонка = flex, центрируем по X/Y */}
                 <div className="md:col-span-2 flex items-center justify-center">
-                  <div className="relative h-full w-full flex items-center justify-center overflow-hidden rounded-l-2xl md:rounded-l-2xl md:rounded-r-none p-2">
+                  <div className="relative h-full w-full flex items-center justify-center overflow-hidden rounded-l-2xl md:rounded-l-2xl md:rounded-r-none p-2 lightbox-media">
                     <img
                       src={card.image}
                       alt={card.name}
@@ -673,7 +601,7 @@ function Lightbox({ card, onClose, onPrev, onNext, autoplayToken }: { card: any,
                   </div>
                 </div>
 
-                <div className="md:col-span-3 p-6 md:p-8 flex flex-col gap-4">
+                <div className="md:col-span-3 p-6 md:p-8 flex flex-col gap-4 lightbox-body">
                   <div className="show-on-mobile-landscape mb-1"><Badge rarity={card.rarity} /></div>
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -806,7 +734,7 @@ export default function App() {
             </div>
 
               <section id="order-story"><OrderStory/></section>
-              <CeremonialBlock />
+
 
             <section id="relics" className="relative mx-auto max-w-6xl px-4 pb-24">
               <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
