@@ -385,28 +385,59 @@ body,
 }
 
 
-/* === Lightbox: tablet portrait (768–1024px, portrait) === */
+/* ================= Tablet Portrait Tweaks (768–1024px) ================= */
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
-  .lightbox-root { padding: 0; }
-  .lightbox-dialog {
-    max-width: 92vw;
+  /* --- Main cards grid: make all items equal height --- */
+  .cards-grid > * { height: 100%; }
+  .cards-grid > * > * { height: 100%; }
+  .card-root { height: 100%; display: flex; flex-direction: column; }
+  .card-root .card-media { aspect-ratio: 3 / 4; width: 100%; }
+  .card-root .card-content { flex: 1 1 auto; display: flex; flex-direction: column; }
+
+  /* --- Fullscreen card (lightbox) behaves like phone --- */
+  /* Root overlay */
+  .fixed.inset-0.z-50 { padding: 0; }
+  /* Dialog container (Tile3D/light-sweep wrapper) */
+  .fixed.inset-0.z-50 .light-sweep {
     width: 92vw;
+    max-width: 92vw;
     max-height: 90vh;
     margin: 0 auto;
     border-radius: 14px;
     overflow: hidden;
   }
-  .lightbox-media {
+  /* Grid to single column */
+  .fixed.inset-0.z-50 .light-sweep .grid {
+    grid-template-columns: 1fr !important;
+  }
+  .fixed.inset-0.z-50 .light-sweep .grid > * {
+    width: 100%;
+  }
+  /* Media (left column) */
+  .fixed.inset-0.z-50 .light-sweep .grid > *:first-child {
     max-height: 48vh;
     aspect-ratio: 3 / 4;
   }
-  .lightbox-media > img, .lightbox-media > video, .lightbox-media > canvas {
-    width: 100%; height: 100%; object-fit: contain;
+  .fixed.inset-0.z-50 .light-sweep .grid > *:first-child img,
+  .fixed.inset-0.z-50 .light-sweep .grid > *:first-child video,
+  .fixed.inset-0.z-50 .light-sweep .grid > *:first-child canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
-  .lightbox-body {
-    max-height: calc(90vh - 48vh - 64px);
+  /* Text column scroll area */
+  .fixed.inset-0.z-50 .light-sweep .grid > *:last-child {
+    max-height: calc(90vh - 48vh - 56px);
     overflow: auto;
     -webkit-overflow-scrolling: touch;
   }
-  .lightbox-title { font-size: clamp(20px, 2.4vw, 22px); line-height: 1.2; }
+  /* Titles and text slightly smaller (phone-like) */
+  .fixed.inset-0.z-50 h3 { font-size: clamp(20px, 2.4vw, 22px); line-height: 1.2; }
+  .fixed.inset-0.z-50 p, .fixed.inset-0.z-50 li { font-size: clamp(14px, 2vw, 15px); }
+  /* Actions wrap neatly */
+  .fixed.inset-0.z-50 .flex.items-center.gap-3, 
+  .fixed.inset-0.z-50 .actions, 
+  .fixed.inset-0.z-50 .btn-row {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
 }
