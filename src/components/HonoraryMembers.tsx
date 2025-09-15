@@ -23,11 +23,11 @@ const toHandle = (s: string) =>
 
 /** Цепочка источников (без локального fallback — он рендерится фоном) */
 const srcChain = (h: string) => [
-    `/api/avatar?handle=${encodeURIComponent(h)}`,   // ← наш same-origin эндпоинт
-    // запасные варианты (редко понадобятся)
+    `/api/avatar?handle=${encodeURIComponent(h)}`,  // ← наш прокси
+    `https://unavatar.io/x/${encodeURIComponent(h)}`, // можно оставить как запасной
     `https://unavatar.io/twitter/${encodeURIComponent(h)}`,
-    `https://robohash.org/${encodeURIComponent(h)}.png?size=400x400&set=set1`,
 ];
+
 
 
 const FALLBACK = "/avatar-fallback.png"; // положи файл в /public

@@ -1,47 +1,46 @@
-// /api/avatar.ts  — Vercel Serverless Function
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+// /api/avatar.ts — Vercel Edge Function (без robohash)
+export const config = { runtime: "edge" };
 
-/** очередность источников: unavatar -> зеркало x -> генеративный бэкап */
 const SOURCES = (h: string) => [
   `https://unavatar.io/twitter/${encodeURIComponent(h)}`,
   `https://unavatar.io/x/${encodeURIComponent(h)}`,
 ];
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const handle = String(req.query.handle || "").replace(/^@/, "");
-  if (!handle) return res.status(400).send("handle required");
+export default async function handler(req: Request): Promise<Response> {
+  const url = new URL(req.url);
+  const handle = (url.searchParams.get("handle") || "").replace(/^@/, "");
+  if (!handle) return new Response("handle required", { status: 400 });
 
-  for (const url of SOURCES(handle)) {
+  for (const src of SOURCES(handle)) {
     try {
-      const r = await fetch(url, {
-        // не передаём реферер на сторонний домен
-        referrerPolicy: "no-referrer",
-        headers: { "User-Agent": "OrdoMemeticusAvatar/1.0" },
+      const r = await fetch(src, {
+        headers: {
+          // на всякий: явно просим картинку и ставим UA
+          Accept: "image/*",
+          "User-Agent": "OrdoMemeticusAvatar/1.0",
+        },
+        redirect: "follow",
       });
       if (!r.ok) continue;
 
       const type = r.headers.get("content-type") || "image/png";
-      const buf = Buffer.from(await r.arrayBuffer());
-
-      res.setHeader("Content-Type", type);
-      // кэш CDN/браузера на сутки + SWR на неделю
-      res.setHeader(
-        "Cache-Control",
-        "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800"
-      );
-      return res.status(200).send(buf);
+      const headers = new Headers({
+        "Content-Type": type,
+        // кэш: сутки + SWR на неделю
+        "Cache-Control":
+          "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
+      });
+      return new Response(r.body, { headers });
     } catch {
       // пробуем следующий источник
     }
   }
 
-  // наш локальный фолбэк из /public
-  const proto = (req.headers["x-forwarded-proto"] as string) || "https";
-  const host = req.headers.host;
-  const fb = await fetch(`${proto}://${host}/avatar-fallback.png`);
-  const buf = Buffer.from(await fb.arrayBuffer());
-
-  res.setHeader("Content-Type", "image/png");
-  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-  return res.status(200).send(buf);
+  // локальный фолбэк из /public
+  const fb = await fetch(new URL("/avatar-fallback.png", url.origin));
+  const headers = new Headers({
+    "Content-Type": fb.headers.get("content-type") || "image/png",
+    "Cache-Control": "public, max-age=31536000, immutable",
+  });
+  return new Response(fb.body, { headers });
 }
