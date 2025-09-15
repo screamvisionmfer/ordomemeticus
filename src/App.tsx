@@ -34,7 +34,7 @@ const RotatingHeroBG: React.FC = () => {
 };
 
 /** ====================== Config ====================== */
-const PACK_URL = "https://vibemarket.com/market/ordo-memeticus?ref=B3FLA1AGGOH2";
+const PACK_URL = "https://vibechain.com/market/ordo-memeticus?ref=B3FLA1AGGOH2";
 const RARITY_ORDER = ["Mythical", "Legendary", "Epic", "Rare", "Common"] as const;
 type Rarity = typeof RARITY_ORDER[number];
 /** Background images for hero section (from /public/cards) */
