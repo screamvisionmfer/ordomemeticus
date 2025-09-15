@@ -23,15 +23,12 @@ const toHandle = (s: string) =>
 
 /** Цепочка источников (без локального fallback — он рендерится фоном) */
 const srcChain = (h: string) => [
-    `https://unavatar.io/x/${encodeURIComponent(h)}`,
+    `/api/avatar?handle=${encodeURIComponent(h)}`,   // ← наш same-origin эндпоинт
+    // запасные варианты (редко понадобятся)
     `https://unavatar.io/twitter/${encodeURIComponent(h)}`,
-    `https://unavatar.io/${encodeURIComponent(h)}`,
-    `https://unavatar.io/https://twitter.com/${encodeURIComponent(h)}`,
-    // генеративный бэкап (почти всегда отдаёт картинку)
     `https://robohash.org/${encodeURIComponent(h)}.png?size=400x400&set=set1`,
-    // в самом конце — белый твиттер-«дефолт»
-    "https://abs.twimg.com/sticky/default_profile_images/default_profile_400x400.png",
 ];
+
 
 const FALLBACK = "/avatar-fallback.png"; // положи файл в /public
 
