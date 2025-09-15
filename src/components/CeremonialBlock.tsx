@@ -37,6 +37,29 @@ function RarityRow({ allowed }: { allowed: Tier[] }) {
     );
 }
 
+/** Печать в правом верхнем углу карточки + красное свечение на hover */
+function SealOverlayTopRight() {
+    return (
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+            <img
+                src="/sigillum.png"
+                alt=""
+                draggable={false}
+                loading="lazy"
+                className="
+          absolute -top-6 -right-6 w-40 md:w-56
+          opacity-[0.06] md:opacity-[0.07]
+          rotate-[8deg]
+          mix-blend-soft-light
+          transition-all duration-300
+          group-hover:opacity-40
+          group-hover:drop-shadow-[0_0_34px_rgba(220,38,38,0.85)]
+        "
+            />
+        </div>
+    );
+}
+
 export default function CeremonialBlock() {
     // audio
     const saintRef = useRef<HTMLAudioElement | null>(null);
@@ -74,6 +97,16 @@ export default function CeremonialBlock() {
             aria-labelledby="ceremonial-title"
             className="relative mx-auto max-w-6xl px-6 md:px-8 py-10 md:py-16"
         >
+            {/* Большая атмосферная печать на всю секцию (можешь удалить, если мешает) */}
+            <img
+                src="/sigillum.png"
+                alt=""
+                aria-hidden
+                draggable={false}
+                loading="lazy"
+                className="pointer-events-none select-none absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 w-[78vmin] max-w-[900px] opacity-[0.05] md:opacity-[0.06] blur-[1px] mix-blend-soft-light"
+            />
+
             {/* preload hover SFX */}
             <audio ref={saintRef} src="/saintmaker.mp3" preload="auto" />
             <audio ref={patronRef} src="/patron.mp3" preload="auto" />
@@ -97,12 +130,11 @@ export default function CeremonialBlock() {
                     initial="initial"
                     whileInView="animate"
                     viewport={{ once: true, amount: 0.35 }}
-                    // ХОВЕР ЗДЕСЬ: подъём/наклон + теплая бирюзовая подсветка через drop-shadow (filter)
-                    className="relative rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:scale-[1.02] hover:rotate-[0.25deg] filter hover:drop-shadow-[0_0_60px_rgba(34,211,238,0.5)]"
+                    className="group relative rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:scale-[1.02] hover:rotate-[0.25deg] filter hover:drop-shadow-[0_0_60px_rgba(34,211,238,0.5)]"
                     onMouseEnter={() => playOnce(saintRef)}
                     onMouseLeave={() => fadeStop(saintRef)}
                 >
-                    {/* градиентный border с мягким переливом */}
+                    {/* градиентный border */}
                     <div
                         className="p-[2px] rounded-2xl"
                         style={{
@@ -112,36 +144,41 @@ export default function CeremonialBlock() {
                             animation: "ceremonyShift 10s ease-in-out infinite",
                         }}
                     >
-                        {/* контентная панель — одинаковая высота */}
-                        <div className="rounded-2xl bg-black/45 backdrop-blur-md ring-1 ring-cyan-300/35 p-6 md:p-8 min-h-[clamp(22rem,38vh,30rem)] flex flex-col">
-                            <div className="mb-3">
-                                <span className="inline-flex items-center rounded-full border border-amber-500/40 bg-black/30 px-3 py-1 text-amber-200 text-sm">
-                                    Mythic
-                                </span>
-                            </div>
+                        {/* контентная панель */}
+                        <div className="relative rounded-2xl bg-black/45 backdrop-blur-md ring-1 ring-cyan-300/35 p-6 md:p-8 min-h-[clamp(22rem,38vh,30rem)]">
+                            {/* печать в правом верхнем углу */}
+                            <SealOverlayTopRight />
+                            {/* контент */}
+                            <div className="relative z-10 flex flex-col">
+                                <div className="mb-3">
+                                    <span className="inline-flex items-center rounded-full border border-amber-500/40 bg-black/30 px-3 py-1 text-amber-200 text-sm">
+                                        Mythic
+                                    </span>
+                                </div>
 
-                            <h3 className="font-[UnifrakturCook] text-2xl md:text-3xl text-amber-100">
-                                Saintmaker’s Privilege
-                            </h3>
+                                <h3 className="font-[UnifrakturCook] text-2xl md:text-3xl text-amber-100">
+                                    Saintmaker’s Privilege
+                                </h3>
 
-                            <p className="mt-3 text-amber-100/85 leading-relaxed">
-                                <span className="font-bold uppercase text-amber-100">Power:</span> commission a new stained-glass relic.
-                            </p>
-
-                            <RarityRow allowed={["Legendary", "Epic", "Rare", "Common"]} />
-
-                            <div className="mt-4 space-y-3 text-amber-100/85 text-sm md:text-base">
-                                <p>
-                                    <span className="font-bold uppercase text-amber-100">Subject:</span> any character on demand —{" "}
-                                    <em>you yourself</em>, or anyone you choose (from pilgrim to crowned lord).
+                                <p className="mt-3 text-amber-100/85 leading-relaxed">
+                                    <span className="font-bold uppercase text-amber-100">Power:</span> commission a new stained-glass relic.
                                 </p>
-                                <p>
-                                    <span className="font-bold uppercase text-amber-100">Outcome:</span> one new relic is created at the
-                                    chosen tier in the canonical style of the Order.
-                                </p>
-                            </div>
 
-                            <div className="flex-1" />
+                                <RarityRow allowed={["Legendary", "Epic", "Rare", "Common"]} />
+
+                                <div className="mt-4 space-y-3 text-amber-100/85 text-sm md:text-base">
+                                    <p>
+                                        <span className="font-bold uppercase text-amber-100">Subject:</span> any character on demand —{" "}
+                                        <em>you yourself</em>, or anyone you choose (from pilgrim to crowned lord).
+                                    </p>
+                                    <p>
+                                        <span className="font-bold uppercase text-amber-100">Outcome:</span> one new relic is created at the
+                                        chosen tier in the canonical style of the Order.
+                                    </p>
+                                </div>
+
+                                <div className="flex-1" />
+                            </div>
                         </div>
                     </div>
                 </motion.article>
@@ -152,7 +189,7 @@ export default function CeremonialBlock() {
                     initial="initial"
                     whileInView="animate"
                     viewport={{ once: true, amount: 0.35 }}
-                    className="relative rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:scale-[1.02] hover:-rotate-[0.25deg] filter hover:drop-shadow-[0_0_60px_rgba(251,191,36,0.55)]"
+                    className="group relative rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:scale-[1.02] hover:-rotate-[0.25deg] filter hover:drop-shadow-[0_0_60px_rgba(251,191,36,0.55)]"
                     onMouseEnter={() => playOnce(patronRef)}
                     onMouseLeave={() => fadeStop(patronRef)}
                 >
@@ -165,48 +202,62 @@ export default function CeremonialBlock() {
                             animation: "ceremonyShift 10s ease-in-out infinite",
                         }}
                     >
-                        <div className="rounded-2xl bg-black/45 backdrop-blur-md ring-1 ring-amber-400/40 p-6 md:p-8 min-h-[clamp(22rem,38vh,30rem)] flex flex-col">
-                            <div className="mb-3">
-                                <span className="inline-flex items-center rounded-full border border-amber-500/40 bg-black/30 px-3 py-1 text-amber-200 text-sm">
-                                    Legendary
-                                </span>
-                            </div>
+                        <div className="relative rounded-2xl bg-black/45 backdrop-blur-md ring-1 ring-amber-400/40 p-6 md:p-8 min-h-[clamp(22rem,38vh,30rem)]">
+                            {/* печать в правом верхнем углу */}
+                            <SealOverlayTopRight />
+                            {/* контент */}
+                            <div className="relative z-10 flex flex-col">
+                                <div className="mb-3">
+                                    <span className="inline-flex items-center rounded-full border border-amber-500/40 bg-black/30 px-3 py-1 text-amber-200 text-sm">
+                                        Legendary
+                                    </span>
+                                </div>
 
-                            <h3 className="font-[UnifrakturCook] text-2xl md:text-3xl text-amber-100">
-                                Patron’s Privilege
-                            </h3>
+                                <h3 className="font-[UnifrakturCook] text-2xl md:text-3xl text-amber-100">
+                                    Patron’s Privilege
+                                </h3>
 
-                            <p className="mt-3 text-amber-100/85 leading-relaxed">
-                                <span className="font-bold uppercase text-amber-100">Power:</span> appoint the next relic’s tier and concept.
-                            </p>
-
-                            <RarityRow allowed={["Epic", "Rare", "Common"]} />
-
-                            <div className="mt-4 space-y-3 text-amber-100/85 text-sm md:text-base">
-                                <p>
-                                    <span className="font-bold uppercase text-amber-100">Subject:</span> propose the character/theme; the
-                                    Order interprets and finalizes.
+                                <p className="mt-3 text-amber-100/85 leading-relaxed">
+                                    <span className="font-bold uppercase text-amber-100">Power:</span> appoint the next relic’s tier and concept.
                                 </p>
-                                <p>
-                                    <span className="font-bold uppercase text-amber-100">Outcome:</span> one new relic will be produced at the
-                                    chosen tier.
-                                </p>
-                            </div>
 
-                            <div className="flex-1" />
+                                <RarityRow allowed={["Epic", "Rare", "Common"]} />
+
+                                <div className="mt-4 space-y-3 text-amber-100/85 text-sm md:text-base">
+                                    <p>
+                                        <span className="font-bold uppercase text-amber-100">Subject:</span> propose the character/theme; the
+                                        Order interprets and finalizes.
+                                    </p>
+                                    <p>
+                                        <span className="font-bold uppercase text-amber-100">Outcome:</span> one new relic will be produced at the
+                                        chosen tier.
+                                    </p>
+                                </div>
+
+                                <div className="flex-1" />
+                            </div>
                         </div>
                     </div>
                 </motion.article>
             </div>
 
             {/* Contact block under the cards */}
-            <div className="mt-8 md:mt-10 rounded-xl ring-1 ring-amber-500/20 bg-black/40 backdrop-blur-sm p-4 md:p-5">
-                <p className="text-amber-100/85 leading-relaxed">
+            <div className="mt-8 md:mt-10 rounded-xl ring-1 ring-amber-500/20 bg-black/40 backdrop-blur-sm p-4 md:p-5 relative overflow-hidden">
+                {/* маленькая печать в подложке блока контактов */}
+                <img
+                    src="/sigillum.png"
+                    alt=""
+                    aria-hidden
+                    draggable={false}
+                    loading="lazy"
+                    className="pointer-events-none absolute -right-4 -bottom-8 w-40 md:w-56 opacity-[0.05] rotate-[8deg] mix-blend-soft-light"
+                />
+                <p className="text-amber-100/85 leading-relaxed relative z-10">
                     After receiving a <span className="text-amber-200">Mythic</span> or{" "}
                     <span className="text-amber-200">Legendary</span>, contact me and send proof of ownership, then tell which new
                     saint (you yourself or any character) you wish to immortalize in glass.
                 </p>
-                <div className="mt-4 flex flex-wrap items-center gap-3">
+                <div className="mt-4 flex flex-wrap items-center gap-3 relative z-10">
                     <a
                         href="https://farcaster.xyz/screamvision"
                         target="_blank"

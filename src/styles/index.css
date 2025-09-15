@@ -451,3 +451,96 @@ body,
     /* зазор между карточками, можешь подправить */
   }
 }
+/* анимированная градиентная рамка (поверх card bg, не мешает контенту) */
+.borderAnim {
+  --g1: rgba(251, 191, 36, .85);
+  /* amber */
+  --g2: rgba(34, 211, 238, .85);
+  /* cyan  */
+  border-radius: 1rem;
+  /* 16px ~ rounded-2xl с inset */
+  mask-composite: exclude;
+}
+
+.borderAnim::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(120deg, var(--g1), var(--g2), var(--g1));
+  background-size: 220% 220%;
+  animation: borderFlow 8s ease-in-out infinite;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+@keyframes borderFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* shine sweep при hover */
+.shine {
+  background:
+    linear-gradient(100deg,
+      rgba(255, 255, 255, 0) 20%,
+      rgba(255, 255, 255, 0.12) 50%,
+      rgba(255, 255, 255, 0) 80%);
+  transform: translateX(-120%);
+  animation: none;
+}
+
+.group:hover .shine {
+  animation: shineMove 1s ease-out forwards;
+}
+
+@keyframes shineMove {
+  to {
+    transform: translateX(120%);
+  }
+}
+
+/* shimmer skeleton */
+.shimmer {
+  background: linear-gradient(90deg, rgba(255, 255, 255, .05) 0%, rgba(255, 255, 255, .12) 50%, rgba(255, 255, 255, .05) 100%);
+  background-size: 200% 100%;
+  animation: shimmerMove 1.1s linear infinite;
+}
+
+@keyframes shimmerMove {
+  to {
+    background-position: -200% 0;
+  }
+}
+/* shine по диагонали при hover — без рамок */
+.hm-shine {
+  background: linear-gradient(100deg,
+      rgba(255, 255, 255, 0) 20%,
+      rgba(255, 255, 255, 0.10) 50%,
+      rgba(255, 255, 255, 0) 80%);
+  transform: translateX(-120%);
+  animation: none;
+}
+
+.group:hover .hm-shine {
+  animation: hmShineMove 0.9s ease-out forwards;
+}
+
+@keyframes hmShineMove {
+  to {
+    transform: translateX(120%);
+  }
+}

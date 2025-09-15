@@ -3,7 +3,7 @@ import OrderStory from "./components/OrderStory";
 import { motion, AnimatePresence } from "framer-motion";
 import CeremonialBlock from "@/components/CeremonialBlock";
 import OMHeaderPillIntegrated from "./components/OMHeaderPillIntegrated";
-
+import HonoraryMembers from "@/components/HonoraryMembers";
 
 /** ============== Hero Background Rotator (full-width) ============== */
 const RotatingHeroBG: React.FC = () => {
@@ -344,48 +344,112 @@ const IntroScreen: React.FC<{ onEnter: () => void }> = ({ onEnter }) => {
   const voiceRef = useRef<HTMLAudioElement | null>(null);
   const [started, setStarted] = useState(false);
   const [logoDock, setLogoDock] = useState(false);
+
+  // первая кнопка — запускает Intro.mp3 + фон (bg/tavern)
   const begin = () => {
     setStarted(true);
     setTimeout(() => setLogoDock(true), 150);
-    const v = voiceRef.current; if (v) { v.volume = 0.25; v.currentTime = 0; v.play().catch(() => { }); }
+
+    const v = voiceRef.current;
+    if (v) {
+      v.volume = 0.25;
+      v.currentTime = 0;
+      v.play().catch(() => { });
+    }
+
+    // запустить bg + tavern через твой BgAudio
     document.dispatchEvent(new Event("ordo:startAudio"));
   };
+
+  // мягко заглушить только Intro.mp3
+  const fadeStopIntro = (dur = 140) => {
+    const el = voiceRef.current;
+    if (!el) return;
+    const v0 = el.volume ?? 1;
+    const t0 = performance.now();
+    const step = (ts: number) => {
+      const p = Math.min((ts - t0) / dur, 1);
+      el.volume = v0 * (1 - p);
+      if (p < 1) requestAnimationFrame(step);
+      else {
+        try {
+          el.pause();
+          el.currentTime = 0;
+          el.volume = v0; // вернуть громкость на будущее
+        } catch { }
+      }
+    };
+    requestAnimationFrame(step);
+  };
+
+  // вторая кнопка — выключает ТОЛЬКО Intro, фон остаётся
+  const enterCloister = () => {
+    fadeStopIntro(140);   // ← гасим Intro.mp3
+    onEnter();            // ← закрываем интро
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-black text-amber-200 flex items-center justify-center">
-      +   <IntroBackground />
+      {/* ИСПРАВЛЕНО: без лишнего '+' */}
+      <IntroBackground />
+
       <audio ref={voiceRef} src="/Intro.mp3" preload="auto" />
+
       <div className="relative z-10 w-full max-w-4xl mx-auto px-6 text-center">
         <motion.h1
           initial={{ opacity: 0, top: "28%" }}
           animate={{ opacity: 1, top: started ? (logoDock ? "8%" : "28%") : "28%" }}
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="absolute left-1/2 -translate-x-1/2 font-[UnifrakturCook] text-3xl sm:text-4xl md:text-5xl tracking-wide"
-        >ORDO MEMETICUS</motion.h1>
+        >
+          ORDO MEMETICUS
+        </motion.h1>
 
         {!started && (
           <div className="pt-80 flex flex-col items-center gap-6">
-            <button id="ordostart" onClick={begin}
-              className="btn-medieval is-gilded is-lg">
+            {/* ПЕРВАЯ КНОПКА: запускает Intro + bg + tavern */}
+            <button id="ordostart" onClick={begin} className="btn-medieval is-gilded is-lg">
               Hear the Great Ones
             </button>
           </div>
         )}
 
         {started && (
-          <motion.div className="pt-28 md:pt-40 flex flex-col items-center text-center"
-            initial={{ opacity: 0 }} animate={{ opacity: logoDock ? 1 : 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}>
-            <motion.div className="mt-6 md:mt-4 max-w-3xl text-md sm:text-base md:text-lg italic leading-snug md:leading-relaxed text-amber-100/90 space-y-3 md:space-y-3"
-              initial="hidden" animate={logoDock ? "show" : "hidden"}
-              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.25, delayChildren: 0.1 } } }}>
-              {INTRO_LINES.map((line, i) => line === "" ? <div key={i} className="h-3" /> : (
-                <motion.p key={i} variants={{ hidden: { opacity: 0, y: -10 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.55, ease: "easeOut" }}>{line}</motion.p>
-              ))}
+          <motion.div
+            className="pt-28 md:pt-40 flex flex-col items-center text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: logoDock ? 1 : 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+          >
+            <motion.div
+              className="mt-6 md:mt-4 max-w-3xl text-md sm:text-base md:text-lg italic leading-snug md:leading-relaxed text-amber-100/90 space-y-3 md:space-y-3"
+              initial="hidden"
+              animate={logoDock ? "show" : "hidden"}
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.25, delayChildren: 0.1 } } }}
+            >
+              {INTRO_LINES.map((line, i) =>
+                line === "" ? (
+                  <div key={i} className="h-3" />
+                ) : (
+                  <motion.p
+                    key={i}
+                    variants={{ hidden: { opacity: 0, y: -10 }, show: { opacity: 1, y: 0 } }}
+                    transition={{ duration: 0.55, ease: "easeOut" }}
+                  >
+                    {line}
+                  </motion.p>
+                )
+              )}
             </motion.div>
-            <motion.button onClick={() => { begin(); onEnter(); }} initial={{ opacity: 0, y: 16 }}
+
+            {/* ВТОРАЯ КНОПКА: выключает ТОЛЬКО Intro, фон продолжает */}
+            <motion.button
+              onClick={enterCloister}        // ← ВАЖНО: больше НЕ вызываем begin()
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: logoDock ? 1 : 0, y: logoDock ? 0 : 16 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.8 }}
-              className="btn-medieval is-gilded is-lg mt-10 px-6 py-3">
+              className="btn-medieval is-gilded is-lg mt-10 px-6 py-3"
+            >
               Enter the Cloister
             </motion.button>
           </motion.div>
@@ -394,6 +458,7 @@ const IntroScreen: React.FC<{ onEnter: () => void }> = ({ onEnter }) => {
     </div>
   );
 };
+
 /** ============== Intro Background Rotator ============== */
 const IntroBackground: React.FC = () => {
   const [idx, setIdx] = useState(0);
@@ -782,18 +847,37 @@ export default function App() {
                 })}
               />
             )}
-
+              <HonoraryMembers
+                title="HONORARY MEMBERS"
+                members={[
+                  "https://x.com/scream_vision",
+                  "https://x.com/JungleBayAC",
+                  "https://x.com/thosmur",
+                  "https://x.com/bobocoineth",
+                  "https://x.com/_seacasa",
+                  "https://x.com/hi_im_nico",
+                  "https://x.com/0xDeployer",
+                  "https://x.com/ink_mfer",
+                  "https://x.com/pepecoineth",
+                  "https://x.com/bankrbot",
+                  "https://x.com/hibarivision",
+                  "https://x.com/mumucoineth_",
+                  "https://x.com/vibedotmarket",
+                ]}
+                visible={12}
+                interval={3000}
+              />
             <footer className="relative border-t border-amber-500/20 bg-black/80">
               <div className="mx-auto max-w-6xl px-4 py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div className="text-amber-200/80 text-sm rounded-md ring-1 ring-amber-500/30 px-3 py-2 bg-black/20">Created by <a href="https://x.com/scream_vision" target="_blank" rel="noreferrer" className="underline decoration-amber-400/60 hover:decoration-amber-300 hover:text-amber-100">Scream.Vision</a></div>
+                  <div className="space-y-2">
+                    <div className="text-amber-200 font-semibold tracking-wide font-[UnifrakturCook]">ORDO MEMETICUS</div>
+                    <p className="text-amber-200/60 text-sm max-w-xl">
+                      All faces are remembered — heroes, fools, martyrs, and villains. Raise not stone nor parchment, but glass and chain. <em>In tenebris, lumen.</em>
+                    </p>
+                  </div><div className="btn-medieval is-gilded is-xs text-amber-200/80 text-sm rounded-md ring-1 ring-amber-500/30 px-3 py-2 bg-black/20">Created by <a href="https://x.com/scream_vision" target="_blank" rel="noreferrer" className="underline decoration-amber-400/60 hover:decoration-amber-300 hover:text-amber-100">Scream.Vision</a></div>
 
-                <div className="space-y-2">
-                  <div className="text-amber-200 font-semibold tracking-wide font-[UnifrakturCook]">ORDO MEMETICUS</div>
-                  <p className="text-amber-200/60 text-sm max-w-xl">
-                    All faces are remembered — heroes, fools, martyrs, and villains. Raise not stone nor parchment, but glass and chain. <em>In tenebris, lumen.</em>
-                  </p>
-                </div>
-                  <a href={PACK_URL} target="_blank" rel="noreferrer" className="btn-medieval is-gilded is-lg mt-10 px-6 py-3 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm">Enter the Cloister</a>
+                
+                  
               </div>
             </footer>
           </motion.main>
