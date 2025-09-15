@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 
 /** Replace with your real links */
 export const LINKS = {
-  join: "https://vibemarket.com/market/ordo-memeticus?ref=B3FLA1AGGOH2",
+  join: "https://vibechain.com/market/ordo-memeticus?ref=B3FLA1AGGOH2",
   twitter: "https://x.com/scream_vision",
   farcaster: "https://farcaster.xyz/screamvision",
   linktree: "https://linktr.ee/screamvision",
