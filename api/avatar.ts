@@ -5,7 +5,6 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 const SOURCES = (h: string) => [
   `https://unavatar.io/twitter/${encodeURIComponent(h)}`,
   `https://unavatar.io/x/${encodeURIComponent(h)}`,
-  `https://robohash.org/${encodeURIComponent(h)}.png?size=400x400&set=set1`,
 ];
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
