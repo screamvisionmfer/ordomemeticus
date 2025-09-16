@@ -26,6 +26,7 @@ const MEME_TICKERS = [
     "$ORDEN",
     "$MUMU",
     "$PEPE",
+    "$BOBO",
     "$BNKR",
     "$DRB",
     "$IKTFB",
