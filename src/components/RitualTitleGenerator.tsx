@@ -11,7 +11,7 @@ const CORE_TICKER = "$ORDEN";
 
 const MEME_TICKERS = [
     "$TOWELIE", "$BRAINLET", "$JBM", "$SOY", "$ORDEN", "$MUMU", "$PEPE",
-    "$BANKR", "$DRB", "$IKTFB", "$PARK",
+    "$BNKR", "$DRB", "$IKTFB", "$PARK",
 ] as const;
 
 /* ======================= SLOTS BY GENDER ====================== */
