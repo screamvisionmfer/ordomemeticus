@@ -544,3 +544,288 @@ body,
     transform: translateX(120%);
   }
 }
+.homm-frame {
+  padding: 32px;
+  /* чтобы освободить место под рамку */
+}
+/* ===== Torch-flicker for title ===== */
+@keyframes torchFlicker {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0px rgba(255, 210, 120, .0));
+    opacity: 1;
+  }
+
+  10% {
+    filter: drop-shadow(0 0 8px rgba(255, 210, 120, .35));
+  }
+
+  20% {
+    filter: drop-shadow(0 0 3px rgba(255, 210, 120, .15));
+  }
+
+  30% {
+    filter: drop-shadow(0 0 10px rgba(255, 210, 120, .45));
+  }
+
+  40% {
+    filter: drop-shadow(0 0 5px rgba(255, 210, 120, .2));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 12px rgba(255, 210, 120, .55));
+  }
+
+  60% {
+    filter: drop-shadow(0 0 4px rgba(255, 210, 120, .25));
+  }
+
+  70% {
+    filter: drop-shadow(0 0 9px rgba(255, 210, 120, .4));
+  }
+
+  80% {
+    filter: drop-shadow(0 0 6px rgba(255, 210, 120, .3));
+  }
+
+  90% {
+    filter: drop-shadow(0 0 11px rgba(255, 210, 120, .5));
+  }
+}
+
+.flicker {
+  animation: torchFlicker 2.2s infinite steps(20);
+}
+
+/* ===== Holy halo behind modal (appears on hover) ===== */
+@keyframes holyGlow {
+  0% {
+    opacity: .0;
+    transform: translate(-50%, -50%) scale(0.98);
+  }
+
+  50% {
+    opacity: .45;
+    transform: translate(-50%, -50%) scale(1.03);
+  }
+
+  100% {
+    opacity: .0;
+    transform: translate(-50%, -50%) scale(0.98);
+  }
+}
+
+.holy-halo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.holy-halo::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 160%;
+  height: 160%;
+  background: radial-gradient(circle at 50% 50%,
+      rgba(255, 230, 140, .30), rgba(255, 180, 60, .22) 35%,
+      rgba(255, 140, 40, .12) 55%, rgba(0, 0, 0, 0) 70%);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1);
+  border-radius: 50%;
+}
+
+.homm-frame:hover+.holy-halo::before,
+.homm-frame:hover::after {
+  animation: holyGlow 1.6s ease-in-out infinite;
+}
+
+/* ===== Fancy gender pill (fallback if нет Tailwind плагинов) ===== */
+.gender-pill {
+  display: flex;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.gender-pill button {
+  flex: 1;
+  padding: .65rem 1rem;
+  font-weight: 600;
+  transition: all .2s ease;
+  background: rgba(24, 20, 16, .55);
+  color: rgba(255, 220, 180, .7);
+  border: 1px solid rgba(190, 140, 60, .25);
+}
+
+.gender-pill button.active {
+  background: linear-gradient(180deg, #6b3f1a, #3b2414 70%, #2c1a0f);
+  color: #f7e3b8;
+  box-shadow: inset 0 1px 0 rgba(255, 220, 170, .25);
+}
+
+.gender-pill button:not(.active):hover {
+  background: rgba(38, 30, 24, .65);
+}
+/* ——— Факельное мерцание заголовка ——— */
+@keyframes torchFlicker {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgba(255, 210, 120, 0));
+  }
+
+  10% {
+    filter: drop-shadow(0 0 6px rgba(255, 210, 120, .25));
+  }
+
+  30% {
+    filter: drop-shadow(0 0 12px rgba(255, 210, 120, .45));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 8px rgba(255, 210, 120, .30));
+  }
+
+  70% {
+    filter: drop-shadow(0 0 14px rgba(255, 210, 120, .5));
+  }
+
+  90% {
+    filter: drop-shadow(0 0 7px rgba(255, 210, 120, .25));
+  }
+}
+
+.flicker {
+  animation: torchFlicker 2.4s infinite steps(20);
+}
+
+/* ——— «Святой» ореол ПОЗАДИ модалки ——— */
+@keyframes holyGlow {
+  0% {
+    opacity: .0;
+    transform: translate(-50%, -50%) scale(.98);
+  }
+
+  50% {
+    opacity: .45;
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+
+  100% {
+    opacity: .0;
+    transform: translate(-50%, -50%) scale(.98);
+  }
+}
+
+.holy-halo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.holy-halo::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 160%;
+  height: 160%;
+  background: radial-gradient(circle, rgba(255, 230, 140, .30), rgba(255, 180, 60, .18) 40%, rgba(0, 0, 0, 0) 70%);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+/* запускаем анимацию при hover на контейнер */
+.halo-parent:hover .holy-halo::before {
+  animation: holyGlow 1.6s ease-in-out infinite;
+}
+
+/* ——— Красивый инпут ——— */
+.input-arcane {
+  background: linear-gradient(180deg, rgba(40, 33, 28, .85), rgba(28, 22, 18, .78));
+  border-radius: 14px;
+  border: 1px solid rgba(190, 140, 60, .25);
+  color: #f3e7c6;
+  padding: .75rem 1rem;
+  outline: none;
+  transition: box-shadow .2s ease, border-color .2s ease;
+}
+
+.input-arcane::placeholder {
+  color: rgba(240, 210, 150, .45);
+}
+
+.input-arcane:focus {
+  border-color: rgba(255, 210, 120, .55);
+  box-shadow: 0 0 0 2px rgba(255, 210, 120, .12), inset 0 0 22px rgba(255, 200, 120, .12);
+}
+
+/* ——— Тумблер пола со «скользящей плашкой» ——— */
+.toggle-rite {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(190, 140, 60, .28);
+  background: rgba(30, 24, 20, .6);
+}
+
+.toggle-rite .thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  width: calc(50% - 6px);
+  left: 3px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #6b3f1a, #3b2414 70%, #2c1a0f);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 170, .25), 0 6px 14px rgba(0, 0, 0, .25);
+  transition: transform .22s ease;
+}
+
+.toggle-rite[data-side="R"] .thumb {
+  transform: translateX(100%);
+}
+
+.toggle-rite button {
+  position: relative;
+  z-index: 1;
+  padding: .7rem 1rem;
+  font-weight: 700;
+  color: rgba(255, 220, 180, .75);
+  transition: color .2s ease;
+}
+
+.toggle-rite button.active {
+  color: #f7e3b8;
+}
+.btn-ordo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .7rem 1rem;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(60, 45, 30, .9), rgba(35, 26, 18, .9));
+  color: #f7e9c9;
+  font-weight: 700;
+  border: 1px solid rgba(190, 140, 60, .3);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 170, .2);
+  transition: transform .08s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.btn-ordo:hover {
+  background: linear-gradient(180deg, rgba(70, 55, 35, .95), rgba(40, 30, 20, .95));
+  box-shadow: 0 0 18px rgba(251, 191, 36, .15);
+}
+
+.btn-ordo:active {
+  transform: translateY(1px);
+}
+
+.btn-ordo-ghost {
+  composes: btn-ordo;
+  background: rgba(28, 22, 18, .6);
+}

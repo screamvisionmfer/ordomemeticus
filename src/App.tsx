@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import CeremonialBlock from "@/components/CeremonialBlock";
 import OMHeaderPillIntegrated from "./components/OMHeaderPillIntegrated";
 import HonoraryMembers from "@/components/HonoraryMembers";
+import RitualTitleGenerator from "@/components/RitualTitleGenerator";
+import RitualeLauncher from "@/components/RitualeLauncher";
 
 /** ============== Hero Background Rotator (full-width) ============== */
 const RotatingHeroBG: React.FC = () => {
@@ -795,10 +797,13 @@ export default function App() {
                   <a href={PACK_URL} target="_blank" rel="noreferrer" className="btn-medieval is-gilded is-sm mt-15 px-6 py-3 rounded-xl px-6 py-3">Collect the Relics</a>
                 <button className="rounded-xl px-6 py-3 font-semibold bg-zinc-900/70 ring-1 ring-amber-500/30 hover:bg-zinc-900/90 text-amber-200" onClick={() => document.getElementById('relics')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>View Relics</button>
               </div>
+                  <div className="mt-6">
+                    <RitualeLauncher />
+                  </div> 
             </section>
             </div>
-
-              <section id="order-story"><OrderStory/></section>
+                  
+                  <section id="order-story"><OrderStory/></section>
               <CeremonialBlock />
 
             <section id="relics" className="relative mx-auto max-w-6xl px-4 pb-24">
@@ -863,6 +868,8 @@ export default function App() {
                   "https://x.com/hibarivision",
                   "https://x.com/mumucoineth_",
                   "https://x.com/vibedotmarket",
+                  "https://x.com/DrocksAlex2",
+                  "https://x.com/Nftkid23",
                 ]}
                 visible={12}
                 interval={3000}
