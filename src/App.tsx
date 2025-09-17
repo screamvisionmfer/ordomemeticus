@@ -6,6 +6,17 @@ import OMHeaderPillIntegrated from "./components/OMHeaderPillIntegrated";
 import HonoraryMembers from "@/components/HonoraryMembers";
 import RitualTitleGenerator from "@/components/RitualTitleGenerator";
 import RitualeLauncher from "@/components/RitualeLauncher";
+import LinksDeck from "@/components/LinksDeck";
+/** Skip intro when URL has #rituale */
+function wantsRituale() {
+  if (typeof window === "undefined") return false;
+  try {
+    const u = new URL(window.location.href);
+    return u.hash === "#rituale" || u.searchParams.get("rituale") === "1";
+  } catch {
+    return window.location.hash === "#rituale";
+  }
+}
 
 /** ============== Hero Background Rotator (full-width) ============== */
 const RotatingHeroBG: React.FC = () => {
@@ -78,6 +89,8 @@ const VOICE_MAP: Record<string, string> = {
   "11": "11-pepemonk.mp3",
   "12": "12-jb.mp3",
   "13": "13-deployer.mp3",
+  "14": "14.mp3",
+  "15": "15.mp3",
 };
 
 
@@ -140,6 +153,25 @@ const CARDS = [
   },
 
   // 6–8 — Rare
+  {
+    id: "om-14",
+    name: "Kevin",
+    role: "The Dickbuttaur of Twinned Axes",
+    rarity: "Rare" as Rarity,
+    image: "/cards/14.jpg",
+    blurbEN: "To the Order he is not mere beast, but parody made flesh — half-man, half-bull, half... Dickbutt? A dickbuttaur defiled by mockery.",
+    loreEN: "His hooves thunder across the fields, his axes cleave through dust and memory alike. In his wrath the covenant is sealed, and in his jest the brethren remember that even fury must bow to laughter.",
+    credits: "@dickbuttbull"
+  }, {
+    id: "om-15",
+    name: "Ink",
+    role: "Shadow of the Meme Park",
+    rarity: "Rare" as Rarity,
+    image: "/cards/15.jpg",
+    blurbEN: "To the Order he is not mere assassin, but oath incarnate — the ink of silence writ upon the glass of flame.",
+    loreEN: "His daggers bear the mark of midnight, each stroke a scripture of death. He moveth unseen, cloaked in vow, where light dare not linger. In his passing, silence falleth; in his strike, covenant is sealed.",
+    credits: "@ink_mfer"
+  }, 
   {
     id: "om-6",
     name: "Beebs",
@@ -332,6 +364,7 @@ const BgAudio: React.FC = () => {
     </div>
   );
 };
+
 /** ====================== Intro ====================== */
 const INTRO_LINES = [
   "Hear these words, ye who stand before the glass.",
@@ -755,7 +788,14 @@ function Lightbox({ card, onClose, onPrev, onNext, autoplayToken }: { card: any,
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(() => !wantsRituale());
+
+  useEffect(() => {
+    if (wantsRituale()) setShowIntro(false);
+    const onHash = () => { if (wantsRituale()) setShowIntro(false); };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
   const [filter, setFilter] = useState<Rarity | "All">("All");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [autoplayToken, setAutoplayToken] = useState(0);
@@ -789,7 +829,8 @@ export default function App() {
 
 
             <div className="relative isolate w-full overflow-hidden">
-            <RotatingHeroBG />
+                <RotatingHeroBG />
+                <LinksDeck show className="mt-6" dexscreener="https://dexscreener.com/..." opensea="https://opensea.io/collection/ordo-memeticus" />
                 <section className="relative z-10 w-full min-h-[75vh] flex flex-col items-center justify-center text-center px-4">
                   <h1 className="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight text-amber-200 font-[UnifrakturCook]">The Ordo Memeticus</h1>
                   <p className="mt-6 text-lg md:text-xl text-amber-100/90 italic max-w-3xl">"In glass and chain our brethren endure — saints and sinners, martyrs and jesters, villains crowned in shame. Take a relic, and be bound to the brotherhood eternal."</p>
@@ -797,6 +838,7 @@ export default function App() {
                   <a href={PACK_URL} target="_blank" rel="noreferrer" className="btn-medieval is-gilded is-sm mt-15 px-6 py-3 rounded-xl px-6 py-3">Collect the Relics</a>
                 <button className="rounded-xl px-6 py-3 font-semibold bg-zinc-900/70 ring-1 ring-amber-500/30 hover:bg-zinc-900/90 text-amber-200" onClick={() => document.getElementById('relics')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>View Relics</button>
               </div>
+                  
                   <div className="mt-6">
                     <RitualeLauncher />
                   </div> 
