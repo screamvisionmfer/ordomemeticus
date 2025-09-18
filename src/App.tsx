@@ -91,12 +91,14 @@ const VOICE_MAP: Record<string, string> = {
   "13": "13-deployer.mp3",
   "14": "14.mp3",
   "15": "15.mp3",
+  "16": "16.mp3",
+  "17": "17.mp3",
 };
 
 
 
 const CARDS = [
-  // 1 — Mythical
+  // Mythical
   {
     id: "om-1",
     name: "Bobo",
@@ -104,11 +106,11 @@ const CARDS = [
     rarity: "Mythical" as Rarity,
     image: "/cards/1.jpg",
     blurbEN: "Upon thrones of ember he sitteth; chains sing in his grasp.",
-    loreEN: "In cathedrals beneath the ash he was enthroned — not by prayer, but by fire. His gaze scorches scripture, his scepter brands the oath. All brethren whisper: 'Where Bobo walks, even shadows burn.",
+    loreEN: "In cathedrals beneath the ash he was enthroned — not by prayer, but by fire. His gaze scorches scripture, his scepter brands the oath. All brethren whisper: 'Where Bobo walks, even shadows burn.'",
     credits: "@bobocoineth"
   },
 
-  // 2–3 — Legendary
+  // Legendary
   {
     id: "om-2",
     name: "Bankr Prophet",
@@ -130,7 +132,17 @@ const CARDS = [
     credits: "@thosmur"
   },
 
-  // 4–5 — Epic
+  // Epic
+  {
+    id: "om-16",
+    name: "Bradymck",
+    role: "The Stonewright of the Cloister.",
+    rarity: "Epic" as Rarity,
+    image: "/cards/16.jpg",
+    blurbEN: "The brethren recall his hammer as more than tool, but covenant itself. Each strike bindeth stone to altar, and altar to eternal glass.",
+    loreEN: "Where he labored, relics rose — paws, prophets, and saints alike — all carved to stand in light beyond the turning of time.",
+    credits: "@BradyMck_"
+  },
   {
     id: "om-4",
     name: "Seacasa",
@@ -152,7 +164,7 @@ const CARDS = [
     credits: "@hi_im_nico"
   },
 
-  // 6–8 — Rare
+  // Rare
   {
     id: "om-14",
     name: "Kevin",
@@ -202,8 +214,6 @@ const CARDS = [
     loreEN: "The Order remembers him as more than knight — he is cycle itself, return eternal, market reborn.",
     credits: "@mumucoineth_"
   },
-
-  // 9–13 — Common
   {
     id: "om-9",
     name: "JC",
@@ -213,6 +223,17 @@ const CARDS = [
     blurbEN: "To the Order he is not only knight, but forge itself — the hand that shapes the unseen.",
     loreEN: "His oath is inked not on parchment, but in lines of code that burn with emerald fire. His sword hums with the logic of order, his cloak shields the sparks of creation.",
     credits: "@cryptojcdenton"
+  },
+  // Common
+  {
+    id: "om-17",
+    name: "Sartocrates",
+    role: "The Pilgrim of Commons",
+    rarity: "Common" as Rarity,
+    image: "/cards/17.jpg",
+    blurbEN: "He is famed not for crowns nor for gold, but for treasures most humble.",
+    loreEN: "Upon his knees he lifteth his hands, delighting in the common relics as though they were crowns of kings, for in their plainness he beholdeth the purest covenant of the Order.",
+    credits: "@sartocrates"
   },
   {
     id: "om-10",
