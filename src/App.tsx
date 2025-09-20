@@ -93,6 +93,10 @@ const VOICE_MAP: Record<string, string> = {
   "15": "15.mp3",
   "16": "16.mp3",
   "17": "17.mp3",
+  "18": "18.mp3",
+  "19": "19.mp3",
+
+
 };
 
 
@@ -136,7 +140,7 @@ const CARDS = [
   {
     id: "om-16",
     name: "Bradymck",
-    role: "The Stonewright of the Cloister.",
+    role: "The Stonewright of the Cloister",
     rarity: "Epic" as Rarity,
     image: "/cards/16.jpg",
     blurbEN: "The brethren recall his hammer as more than tool, but covenant itself. Each strike bindeth stone to altar, and altar to eternal glass.",
@@ -225,6 +229,26 @@ const CARDS = [
     credits: "@cryptojcdenton"
   },
   // Common
+  {
+    id: "om-18",
+    name: "Bobo & Mumu",
+    role: "Keepers of Rise and Fall",
+    rarity: "Common" as Rarity,
+    image: "/cards/18.jpg",
+    blurbEN: "The Chronicle nameth them not foes, but twins of fate — the bear of dusk and the bull of dawn. Together they break bread in the field eternal, for the Order remembereth that rise and fall are but two faces of the same coin.",
+    loreEN: "Thus Bobo guardeth the night of decline, and Mumu heraldeth the morning of ascent. In their union is covenant unbroken, a sign to brethren that no market sway can unseat the eternal glass.",
+    credits: "@mumucoineth_ / @bobocoineth"
+  }, 
+  {
+    id: "om-19",
+    name: "Pepe",
+    role: "The Minstrel of Wandering Flame",
+    rarity: "Common" as Rarity,
+    image: "/cards/19.jpg",
+    blurbEN: "The Chronicle nameth him singer of roads, whose lute carrieth vow and tale alike. By firelight he summoneth old stories, binding brethren in song as in covenant.",
+    loreEN: "Through night and silence his strings endure, whispering of saints and fools, of battles lost and won — that the Order may remember in voice what glass preserveth in light.",
+    credits: "@pepecoineth"
+  },
   {
     id: "om-17",
     name: "Sartocrates",
