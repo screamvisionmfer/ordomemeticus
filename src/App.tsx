@@ -95,6 +95,7 @@ const VOICE_MAP: Record<string, string> = {
   "17": "17.mp3",
   "18": "18.mp3",
   "19": "19.mp3",
+  "20": "20.mp3",
 
 
 };
@@ -115,6 +116,16 @@ const CARDS = [
   },
 
   // Legendary
+  {
+    id: "om-2",
+    name: "Sanctus Puffus",
+    role: "Archangel of the Verdant Flame.",
+    rarity: "Legendary" as Rarity,
+    image: "/cards/20.jpg",
+    blurbEN: "The Chronicle nameth him guardian of the high gardens, whose wings bear the hue of eternal green. In golden mail he descendeth, bearing glass of fire and hand of blessing, that covenant be sealed in smoke and light.",
+    loreEN: "From the clouded heavens he watchest, serene and unbroken, a saint not crowned by kings, but by the brethren’s vow — that even leaf and ember may be enshrined eternal in the Order.",
+    credits: "@scream_vision"
+  }, 
   {
     id: "om-2",
     name: "Bankr Prophet",
