@@ -12,7 +12,7 @@ function wantsRituale() {
   if (typeof window === "undefined") return false;
   try {
     const u = new URL(window.location.href);
-    return u.hash === "#rituale" || u.searchParams.get("rituale") === "1";
+    return u.hash === "#rituale" || u.searchParams.get("rituale") === "1" || Boolean(u.searchParams.get("id"));
   } catch {
     return window.location.hash === "#rituale";
   }
@@ -22,6 +22,12 @@ function wantsRituale() {
 const RotatingHeroBG: React.FC = () => {
   const [idx, setIdx] = useState(0);
   useEffect(() => {
+/* __ID_SKIP_INTRO__ */
+try {
+  const u = new URL(window.location.href);
+  if (u.searchParams.get("id")) setShowIntro(false);
+} catch {}
+
     // 4x slower than default (16s per image)
     const t = setInterval(() => setIdx((i) => (i + 1) % HERO_IMAGES.length), 16000);
     return () => clearInterval(t);
