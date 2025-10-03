@@ -22,11 +22,11 @@ function wantsRituale() {
 const RotatingHeroBG: React.FC = () => {
   const [idx, setIdx] = useState(0);
   useEffect(() => {
-/* __ID_SKIP_INTRO__ */
-try {
-  const u = new URL(window.location.href);
-  if (u.searchParams.get("id")) setShowIntro(false);
-} catch {}
+    /* __ID_SKIP_INTRO__ */
+    try {
+      const u = new URL(window.location.href);
+      if (u.searchParams.get("id")) setShowIntro(false);
+    } catch { }
 
     // 4x slower than default (16s per image)
     const t = setInterval(() => setIdx((i) => (i + 1) % HERO_IMAGES.length), 16000);
@@ -58,8 +58,8 @@ const RARITY_ORDER = ["Mythical", "Legendary", "Epic", "Rare", "Common"] as cons
 type Rarity = typeof RARITY_ORDER[number];
 /** Background images for hero section (from /public/cards) */
 const HERO_IMAGES = [
-  "/cards/1.jpg","/cards/2.jpg","/cards/3.jpg","/cards/4.jpg","/cards/5.jpg","/cards/6.jpg","/cards/7.jpg",
-  "/cards/8.jpg","/cards/9.jpg","/cards/10.jpg","/cards/11.jpg","/cards/12.jpg","/cards/13.jpg",
+  "/cards/1.jpg", "/cards/2.jpg", "/cards/3.jpg", "/cards/4.jpg", "/cards/5.jpg", "/cards/6.jpg", "/cards/7.jpg",
+  "/cards/8.jpg", "/cards/9.jpg", "/cards/10.jpg", "/cards/11.jpg", "/cards/12.jpg", "/cards/13.jpg",
 ];
 
 
@@ -123,7 +123,7 @@ const CARDS = [
 
   // Legendary
   {
-    id: "om-2",
+    id: "om-20",
     name: "Sanctus Puffus",
     role: "Archangel of the Verdant Flame.",
     rarity: "Legendary" as Rarity,
@@ -131,7 +131,7 @@ const CARDS = [
     blurbEN: "The Chronicle nameth him guardian of the high gardens, whose wings bear the hue of eternal green. In golden mail he descendeth, bearing glass of fire and hand of blessing, that covenant be sealed in smoke and light.",
     loreEN: "From the clouded heavens he watchest, serene and unbroken, a saint not crowned by kings, but by the brethren’s vow — that even leaf and ember may be enshrined eternal in the Order.",
     credits: "@scream_vision"
-  }, 
+  },
   {
     id: "om-2",
     name: "Bankr Prophet",
@@ -204,7 +204,7 @@ const CARDS = [
     blurbEN: "To the Order he is not mere assassin, but oath incarnate — the ink of silence writ upon the glass of flame.",
     loreEN: "His daggers bear the mark of midnight, each stroke a scripture of death. He moveth unseen, cloaked in vow, where light dare not linger. In his passing, silence falleth; in his strike, covenant is sealed.",
     credits: "@ink_mfer"
-  }, 
+  },
   {
     id: "om-6",
     name: "Beebs",
@@ -255,7 +255,7 @@ const CARDS = [
     blurbEN: "The Chronicle nameth them not foes, but twins of fate — the bear of dusk and the bull of dawn. Together they break bread in the field eternal, for the Order remembereth that rise and fall are but two faces of the same coin.",
     loreEN: "Thus Bobo guardeth the night of decline, and Mumu heraldeth the morning of ascent. In their union is covenant unbroken, a sign to brethren that no market sway can unseat the eternal glass.",
     credits: "@mumucoineth_ / @bobocoineth"
-  }, 
+  },
   {
     id: "om-19",
     name: "Pepe",
@@ -861,33 +861,33 @@ export default function App() {
   const [filter, setFilter] = useState<Rarity | "All">("All");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [autoplayToken, setAutoplayToken] = useState(0);/* __QUERY_SYNC__ */
-useEffect(() => {
-  try {
-    const u = new URL(window.location.href);
-    const qid = u.searchParams.get("id");
-    if (qid) {
-      const idxAll = CARDS.findIndex(c => c.id === qid);
-      if (idxAll !== -1) {
-        setFilter("All");
-        setLightboxIndex(idxAll);
-      }
-    }
-  } catch {}
-  const onPop = () => {
+  useEffect(() => {
     try {
-      const u2 = new URL(window.location.href);
-      const q = u2.searchParams.get("id");
-      if (!q) {
-        setLightboxIndex(null);
-      } else {
-        const idx = CARDS.findIndex(c => c.id === q);
-        if (idx !== -1) { setFilter("All"); setLightboxIndex(idx); }
+      const u = new URL(window.location.href);
+      const qid = u.searchParams.get("id");
+      if (qid) {
+        const idxAll = CARDS.findIndex(c => c.id === qid);
+        if (idxAll !== -1) {
+          setFilter("All");
+          setLightboxIndex(idxAll);
+        }
       }
-    } catch {}
-  };
-  window.addEventListener("popstate", onPop);
-  return () => window.removeEventListener("popstate", onPop);
-}, []);
+    } catch { }
+    const onPop = () => {
+      try {
+        const u2 = new URL(window.location.href);
+        const q = u2.searchParams.get("id");
+        if (!q) {
+          setLightboxIndex(null);
+        } else {
+          const idx = CARDS.findIndex(c => c.id === q);
+          if (idx !== -1) { setFilter("All"); setLightboxIndex(idx); }
+        }
+      } catch { }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
 
   const list = filter === "All" ? CARDS : CARDS.filter(c => c.rarity === filter);
@@ -919,24 +919,24 @@ useEffect(() => {
 
 
             <div className="relative isolate w-full overflow-hidden">
-                <RotatingHeroBG />
-                <LinksDeck show className="mt-6" dexscreener="https://dexscreener.com/..." opensea="https://opensea.io/collection/ordo-memeticus" />
-                <section className="relative z-10 w-full min-h-[75vh] flex flex-col items-center justify-center text-center px-4">
-                  <h1 className="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight text-amber-200 font-[UnifrakturCook]">The Ordo Memeticus</h1>
-                  <p className="mt-6 text-lg md:text-xl text-amber-100/90 italic max-w-3xl">"In glass and chain our brethren endure — saints and sinners, martyrs and jesters, villains crowned in shame. Take a relic, and be bound to the brotherhood eternal."</p>
-              <div className="mt-10 flex justify-center gap-4">
+              <RotatingHeroBG />
+              <LinksDeck show className="mt-6" dexscreener="https://dexscreener.com/..." opensea="https://opensea.io/collection/ordo-memeticus" />
+              <section className="relative z-10 w-full min-h-[75vh] flex flex-col items-center justify-center text-center px-4">
+                <h1 className="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight text-amber-200 font-[UnifrakturCook]">The Ordo Memeticus</h1>
+                <p className="mt-6 text-lg md:text-xl text-amber-100/90 italic max-w-3xl">"In glass and chain our brethren endure — saints and sinners, martyrs and jesters, villains crowned in shame. Take a relic, and be bound to the brotherhood eternal."</p>
+                <div className="mt-10 flex justify-center gap-4">
                   <a href={PACK_URL} target="_blank" rel="noreferrer" className="btn-medieval is-gilded is-sm mt-15 px-6 py-3 rounded-xl px-6 py-3">Collect the Relics</a>
-                <button className="rounded-xl px-6 py-3 font-semibold bg-zinc-900/70 ring-1 ring-amber-500/30 hover:bg-zinc-900/90 text-amber-200" onClick={() => document.getElementById('relics')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>View Relics</button>
-              </div>
-                  
-                  <div className="mt-6">
-                    <RitualeLauncher />
-                  </div> 
-            </section>
+                  <button className="rounded-xl px-6 py-3 font-semibold bg-zinc-900/70 ring-1 ring-amber-500/30 hover:bg-zinc-900/90 text-amber-200" onClick={() => document.getElementById('relics')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>View Relics</button>
+                </div>
+
+                <div className="mt-6">
+                  <RitualeLauncher />
+                </div>
+              </section>
             </div>
-                  
-                  <section id="order-story"><OrderStory/></section>
-              <CeremonialBlock />
+
+            <section id="order-story"><OrderStory /></section>
+            <CeremonialBlock />
 
             <section id="relics" className="relative mx-auto max-w-6xl px-4 pb-24">
               <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -965,7 +965,7 @@ useEffect(() => {
                     initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
                     {grouped[rarity].map((card) => (
                       <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 12, scale: 0.98 }, show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.45, ease: "easeOut" } } }}>
-                        <GlassCard card={card} onOpen={(c) => { try { const u = new URL(window.location.href); u.searchParams.set("id", c.id); window.history.pushState({}, "", u.toString()); } catch {} ;  setLightboxIndex(list.findIndex(x => x.id === c.id)); setAutoplayToken(t => t + 1); }} /></motion.div>
+                        <GlassCard card={card} onOpen={(c) => { try { const u = new URL(window.location.href); u.searchParams.set("id", c.id); window.history.pushState({}, "", u.toString()); } catch { }; setLightboxIndex(list.findIndex(x => x.id === c.id)); setAutoplayToken(t => t + 1); }} /></motion.div>
                     ))}</motion.div>
                 </div>
               ))}
@@ -975,50 +975,50 @@ useEffect(() => {
               <Lightbox
                 card={list[lightboxIndex]}
                 autoplayToken={autoplayToken}
-                onClose={() => { setLightboxIndex(null); try { const u = new URL(window.location.href); u.searchParams.delete("id"); window.history.pushState({}, "", u.toString()); } catch {} }}
-                onPrev={() => { setLightboxIndex((i) => { const L = list.length; const ni = (i == null ? 0 : (i - 1 + L) % L); try { const u = new URL(window.location.href); u.searchParams.set("id", list[ni].id); window.history.pushState({}, "", u.toString()); } catch {} return ni; }); }}
-                onNext={() => { setLightboxIndex((i) => { const L = list.length; const ni = (i == null ? 0 : (i + 1) % L); try { const u = new URL(window.location.href); u.searchParams.set("id", list[ni].id); window.history.pushState({}, "", u.toString()); } catch {} return ni; }); }}
+                onClose={() => { setLightboxIndex(null); try { const u = new URL(window.location.href); u.searchParams.delete("id"); window.history.pushState({}, "", u.toString()); } catch { } }}
+                onPrev={() => { setLightboxIndex((i) => { const L = list.length; const ni = (i == null ? 0 : (i - 1 + L) % L); try { const u = new URL(window.location.href); u.searchParams.set("id", list[ni].id); window.history.pushState({}, "", u.toString()); } catch { } return ni; }); }}
+                onNext={() => { setLightboxIndex((i) => { const L = list.length; const ni = (i == null ? 0 : (i + 1) % L); try { const u = new URL(window.location.href); u.searchParams.set("id", list[ni].id); window.history.pushState({}, "", u.toString()); } catch { } return ni; }); }}
               />
             )}
-              <HonoraryMembers
-                title="HONORARY MEMBERS"
-                members={[
-                  "https://x.com/scream_vision",
-                  "https://x.com/JungleBayAC",
-                  "https://x.com/thosmur",
-                  "https://x.com/bobocoineth",
-                  "https://x.com/_seacasa",
-                  "https://x.com/hi_im_nico",
-                  "https://x.com/0xDeployer",
-                  "https://x.com/ink_mfer",
-                  "https://x.com/pepecoineth",
-                  "https://x.com/bankrbot",
-                  "https://x.com/hibarivision",
-                  "https://x.com/mumucoineth_",
-                  "https://x.com/vibedotmarket",
-                  "https://x.com/DrocksAlex2",
-                  "https://x.com/Nftkid23",
-                ]}
-                visible={12}
-                interval={3000}
-              />
+            <HonoraryMembers
+              title="HONORARY MEMBERS"
+              members={[
+                "https://x.com/scream_vision",
+                "https://x.com/JungleBayAC",
+                "https://x.com/thosmur",
+                "https://x.com/bobocoineth",
+                "https://x.com/_seacasa",
+                "https://x.com/hi_im_nico",
+                "https://x.com/0xDeployer",
+                "https://x.com/ink_mfer",
+                "https://x.com/pepecoineth",
+                "https://x.com/bankrbot",
+                "https://x.com/hibarivision",
+                "https://x.com/mumucoineth_",
+                "https://x.com/vibedotmarket",
+                "https://x.com/DrocksAlex2",
+                "https://x.com/Nftkid23",
+              ]}
+              visible={12}
+              interval={3000}
+            />
             <footer className="relative border-t border-amber-500/20 bg-black/80">
               <div className="mx-auto max-w-6xl px-4 py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                  <div className="space-y-2">
-                    <div className="text-amber-200 font-semibold tracking-wide font-[UnifrakturCook]">ORDO MEMETICUS</div>
-                    <p className="text-amber-200/60 text-sm max-w-xl">
-                      All faces are remembered — heroes, fools, martyrs, and villains. Raise not stone nor parchment, but glass and chain. <em>In tenebris, lumen.</em>
-                    </p>
-                  </div><div className="btn-medieval is-gilded is-xs text-amber-200/80 text-sm rounded-md ring-1 ring-amber-500/30 px-3 py-2 bg-black/20">Created by <a href="https://x.com/scream_vision" target="_blank" rel="noreferrer" className="underline decoration-amber-400/60 hover:decoration-amber-300 hover:text-amber-100">Scream.Vision</a></div>
+                <div className="space-y-2">
+                  <div className="text-amber-200 font-semibold tracking-wide font-[UnifrakturCook]">ORDO MEMETICUS</div>
+                  <p className="text-amber-200/60 text-sm max-w-xl">
+                    All faces are remembered — heroes, fools, martyrs, and villains. Raise not stone nor parchment, but glass and chain. <em>In tenebris, lumen.</em>
+                  </p>
+                </div><div className="btn-medieval is-gilded is-xs text-amber-200/80 text-sm rounded-md ring-1 ring-amber-500/30 px-3 py-2 bg-black/20">Created by <a href="https://x.com/scream_vision" target="_blank" rel="noreferrer" className="underline decoration-amber-400/60 hover:decoration-amber-300 hover:text-amber-100">Scream.Vision</a></div>
 
-                
-                  
+
+
               </div>
             </footer>
           </motion.main>
         )}
       </AnimatePresence>
-      
-</div>
+
+    </div>
   );
 }
