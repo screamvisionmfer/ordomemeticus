@@ -854,7 +854,35 @@ export default function App() {
   }, []);
   const [filter, setFilter] = useState<Rarity | "All">("All");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [autoplayToken, setAutoplayToken] = useState(0);
+  const [autoplayToken, setAutoplayToken] = useState(0);/* __QUERY_SYNC__ */
+useEffect(() => {
+  try {
+    const u = new URL(window.location.href);
+    const qid = u.searchParams.get("id");
+    if (qid) {
+      const idxAll = CARDS.findIndex(c => c.id === qid);
+      if (idxAll !== -1) {
+        setFilter("All");
+        setLightboxIndex(idxAll);
+      }
+    }
+  } catch {}
+  const onPop = () => {
+    try {
+      const u2 = new URL(window.location.href);
+      const q = u2.searchParams.get("id");
+      if (!q) {
+        setLightboxIndex(null);
+      } else {
+        const idx = CARDS.findIndex(c => c.id === q);
+        if (idx !== -1) { setFilter("All"); setLightboxIndex(idx); }
+      }
+    } catch {}
+  };
+  window.addEventListener("popstate", onPop);
+  return () => window.removeEventListener("popstate", onPop);
+}, []);
+
 
   const list = filter === "All" ? CARDS : CARDS.filter(c => c.rarity === filter);
   const grouped = groupByRarity(list);
@@ -931,7 +959,7 @@ export default function App() {
                     initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
                     {grouped[rarity].map((card) => (
                       <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 12, scale: 0.98 }, show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.45, ease: "easeOut" } } }}>
-                        <GlassCard card={card} onOpen={(c) => { setLightboxIndex(list.findIndex(x => x.id === c.id)); setAutoplayToken(t => t + 1); }} /></motion.div>
+                        <GlassCard card={card} onOpen={(c) => { try { const u = new URL(window.location.href); u.searchParams.set("id", c.id); window.history.pushState({}, "", u.toString()); } catch {} ;  setLightboxIndex(list.findIndex(x => x.id === c.id)); setAutoplayToken(t => t + 1); }} /></motion.div>
                     ))}</motion.div>
                 </div>
               ))}
@@ -941,13 +969,9 @@ export default function App() {
               <Lightbox
                 card={list[lightboxIndex]}
                 autoplayToken={autoplayToken}
-                onClose={() => setLightboxIndex(null)}
-                onPrev={() => setLightboxIndex((i) => {
-                  const L = list.length; if (i == null) return 0; return (i - 1 + L) % L;
-                })}
-                onNext={() => setLightboxIndex((i) => {
-                  const L = list.length; if (i == null) return 0; return (i + 1) % L;
-                })}
+                onClose={() => { setLightboxIndex(null); try { const u = new URL(window.location.href); u.searchParams.delete("id"); window.history.pushState({}, "", u.toString()); } catch {} }}
+                onPrev={() => { setLightboxIndex((i) => { const L = list.length; const ni = (i == null ? 0 : (i - 1 + L) % L); try { const u = new URL(window.location.href); u.searchParams.set("id", list[ni].id); window.history.pushState({}, "", u.toString()); } catch {} return ni; }); }}
+                onNext={() => { setLightboxIndex((i) => { const L = list.length; const ni = (i == null ? 0 : (i + 1) % L); try { const u = new URL(window.location.href); u.searchParams.set("id", list[ni].id); window.history.pushState({}, "", u.toString()); } catch {} return ni; }); }}
               />
             )}
               <HonoraryMembers
@@ -988,6 +1012,7 @@ export default function App() {
           </motion.main>
         )}
       </AnimatePresence>
-    </div>
+      
+</div>
   );
 }
